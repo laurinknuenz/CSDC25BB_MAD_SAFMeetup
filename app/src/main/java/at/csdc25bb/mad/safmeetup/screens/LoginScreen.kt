@@ -19,8 +19,8 @@ fun LoginScreen(navController: NavController) {
     Column(verticalArrangement = Arrangement.Top) {
         RegisterLoginHeader()
         FullSizeCenteredColumn(verticalArrangement = Arrangement.SpaceAround) {
-            var username: String = ""
-            var password: String = ""
+            var username = ""
+            var password = ""
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Column {

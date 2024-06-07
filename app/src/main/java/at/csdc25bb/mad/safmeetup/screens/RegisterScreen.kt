@@ -41,12 +41,12 @@ fun RegisterScreen(navController: NavController) {
                 .padding(vertical = 40.dp),
             verticalArrangement = Arrangement.SpaceAround
         ) {
-            var username: String = ""
-            var password: String = ""
-            var firstName: String = ""
-            var lastName: String = ""
-            var email: String = ""
-            var teamCode: String = ""
+            var username = ""
+            var password = ""
+            var firstName = ""
+            var lastName = ""
+            var email = ""
+            var teamCode = ""
             var checked by remember { mutableStateOf(false) }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
