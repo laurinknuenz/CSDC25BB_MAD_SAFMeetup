@@ -16,15 +16,15 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = darkOrange,
+    secondary = lightOrange,
+    tertiary = triadGreen
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = darkOrange,
+    secondary = lightOrange,
+    tertiary = triadGreen
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -39,9 +39,9 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun SportsAndFriendsMeetupTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false, //isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, //true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
