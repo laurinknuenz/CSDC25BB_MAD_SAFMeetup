@@ -72,7 +72,7 @@ fun RegisterScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.Center
                     ) {
                         checked = minimalCheckbox()
-                        Text(text = "Neues Team erstellen")
+                        Text(text = "Create New Team")
                     }
                 }
                 Button(
