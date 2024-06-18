@@ -1,7 +1,5 @@
 package at.csdc25bb.mad.safmeetup.screens
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

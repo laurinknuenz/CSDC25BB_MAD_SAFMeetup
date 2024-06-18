@@ -10,15 +10,15 @@ import androidx.navigation.NavHostController
 import at.csdc25bb.mad.safmeetup.components.DashboardProfileBottomBar
 
 @Composable
-fun DashboardScreen(navController: NavHostController) {
+fun ProfileScreen(navController: NavHostController) {
     Scaffold(
-        bottomBar = { DashboardProfileBottomBar(navController, true) }
+        bottomBar = { DashboardProfileBottomBar(navController, false) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
         ) {
-            Text("This is your Dashboard!")
+            Text(text = "This is your Profile!")
         }
     }
 }

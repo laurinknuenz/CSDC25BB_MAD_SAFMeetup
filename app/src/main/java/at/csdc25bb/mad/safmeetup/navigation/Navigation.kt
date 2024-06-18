@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import at.csdc25bb.mad.safmeetup.screens.DashboardScreen
 import at.csdc25bb.mad.safmeetup.screens.LoginScreen
+import at.csdc25bb.mad.safmeetup.screens.ProfileScreen
 import at.csdc25bb.mad.safmeetup.screens.RegisterScreen
 
 @Composable
@@ -13,7 +14,7 @@ fun Navigation() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Dashboard.route
     ) {
         composable(route = Screen.Dashboard.route) {
             DashboardScreen(navController = navController)
@@ -23,6 +24,9 @@ fun Navigation() {
         }
         composable(route=Screen.Register.route){
             RegisterScreen(navController)
+        }
+        composable(route=Screen.Profile.route){
+            ProfileScreen(navController = navController)
         }
     }
 }
