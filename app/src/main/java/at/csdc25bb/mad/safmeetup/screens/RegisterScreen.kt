@@ -1,5 +1,7 @@
 package at.csdc25bb.mad.safmeetup.screens
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import at.csdc25bb.mad.safmeetup.components.BottomViewSwitcher
@@ -50,20 +54,28 @@ fun RegisterScreen(navController: NavController) {
             var checked by remember { mutableStateOf(false) }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                val focusRequester = FocusRequester()
+                val focusManager = LocalFocusManager.current
+
                 Column(modifier = Modifier.width(IntrinsicSize.Max)) {
                     TitleSubtitleText(
                         title = "Register",
                         subtitle = "Enter your data to register."
                     )
-                    username = outlinedTextField("Username")
-                    password = outlinedTextField("Password")
+                    username = outlinedTextField("Username", focusRequester, focusManager)
+                    password = outlinedTextField(
+                        label = "Password",
+                        focusRequester = focusRequester,
+                        focusManager = focusManager,
+                        password = true
+                    )
                     Divider(modifier = Modifier.padding(top = 8.dp))
-                    firstName = outlinedTextField("First Name")
-                    lastName = outlinedTextField("Last Name")
-                    email = outlinedTextField("E-Mail Address")
+                    firstName = outlinedTextField("First Name", focusRequester, focusManager)
+                    lastName = outlinedTextField("Last Name", focusRequester, focusManager)
+                    email = outlinedTextField("E-Mail Address", focusRequester, focusManager, true)
                     Divider(modifier = Modifier.padding(top = 8.dp))
-                    AnimatedVisibility(visible = !checked) {
-                        teamCode = outlinedTextField("Team Code")
+                    AnimatedVisibility(visible = checked) {
+                        teamCode = outlinedTextField("Team Code", focusRequester, focusManager)
                     }
                     Row(
                         modifier = Modifier
@@ -72,12 +84,12 @@ fun RegisterScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.Center
                     ) {
                         checked = minimalCheckbox()
-                        Text(text = "Create New Team")
+                        Text(text = "Join Existing Team")
                     }
                 }
                 Button(
                     modifier = Modifier.padding(bottom = 20.dp),
-                    onClick = { }
+                            onClick = { } // TODO: Make registration work with API
                 ) {
                     Text(text = "Click to Register")
                 }

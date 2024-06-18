@@ -55,6 +55,8 @@ dependencies {
     val coreVersion = "1.13.0"
     val lifecycleVersion = "2.7.0"
 
+    implementation ("androidx.compose.material:material-icons-extended")
+
     implementation("androidx.compose.ui:ui-text-google-fonts:$fontsVersion")
 
     implementation("androidx.navigation:navigation-compose:$navVersion")
