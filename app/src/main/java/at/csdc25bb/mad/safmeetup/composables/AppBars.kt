@@ -1,4 +1,4 @@
-package at.csdc25bb.mad.safmeetup.components
+package at.csdc25bb.mad.safmeetup.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +14,7 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
@@ -35,7 +36,7 @@ fun DashboardProfileBottomBar(
         Box {
             Divider(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color(0xFFE9E9E9)
+                color = MaterialTheme.colorScheme.outline
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),

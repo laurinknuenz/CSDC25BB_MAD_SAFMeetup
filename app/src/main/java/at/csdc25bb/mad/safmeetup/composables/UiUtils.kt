@@ -1,4 +1,4 @@
-package at.csdc25bb.mad.safmeetup.components
+package at.csdc25bb.mad.safmeetup.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,9 +1,12 @@
-package at.csdc25bb.mad.safmeetup.components
+package at.csdc25bb.mad.safmeetup.composables
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Checkbox
@@ -16,12 +19,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +47,7 @@ val provider = GoogleFont.Provider(
     providerPackage = "com.google.android.gms",
     certificates = R.array.com_google_android_gms_fonts_certs
 )
+
 @Composable
 fun TextWithGoogleFont(text: String, font: String, size: TextUnit) {
     Text(
@@ -101,6 +107,36 @@ fun outlinedTextField(
         )
     )
     return variable
+}
+
+@Composable
+fun searchBar(modifier: Modifier): String {
+    var searchText by remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        value = searchText,
+        onValueChange = { searchText = it },
+        label = { Text("Enter keywords...") },
+        singleLine = true,
+        trailingIcon = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(end = 10.dp)
+            ) {
+                Text(text = "Advanced", style = TextStyle(fontSize = 14.sp))
+                Text(text = "Filter", style = TextStyle(fontSize = 14.sp))
+            }
+        },
+        leadingIcon = {
+            Icon(imageVector = Icons.Filled.Search, contentDescription = "Search bar")
+        },
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 20.dp)
+    )
+    return searchText
 }
 
 @Composable

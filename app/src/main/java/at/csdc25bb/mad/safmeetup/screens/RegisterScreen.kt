@@ -21,15 +21,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import at.csdc25bb.mad.safmeetup.components.BottomViewSwitcher
-import at.csdc25bb.mad.safmeetup.components.FullSizeCenteredColumn
-import at.csdc25bb.mad.safmeetup.components.RegisterLoginHeader
-import at.csdc25bb.mad.safmeetup.components.TitleSubtitleText
-import at.csdc25bb.mad.safmeetup.components.minimalCheckbox
-import at.csdc25bb.mad.safmeetup.components.outlinedTextField
+import at.csdc25bb.mad.safmeetup.composables.BottomViewSwitcher
+import at.csdc25bb.mad.safmeetup.composables.FullSizeCenteredColumn
+import at.csdc25bb.mad.safmeetup.composables.RegisterLoginHeader
+import at.csdc25bb.mad.safmeetup.composables.TitleSubtitleText
+import at.csdc25bb.mad.safmeetup.composables.minimalCheckbox
+import at.csdc25bb.mad.safmeetup.composables.outlinedTextField
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -51,11 +52,14 @@ fun RegisterScreen(navController: NavController) {
             var teamCode = ""
             var checked by remember { mutableStateOf(false) }
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(IntrinsicSize.Min)
+            ) {
                 val focusRequester = FocusRequester()
                 val focusManager = LocalFocusManager.current
 
-                Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+                Column {
                     TitleSubtitleText(
                         title = "Register",
                         subtitle = "Enter your data to register."
@@ -86,8 +90,11 @@ fun RegisterScreen(navController: NavController) {
                     }
                 }
                 Button(
-                    modifier = Modifier.padding(bottom = 20.dp),
-                            onClick = { } // TODO: Make registration work with API
+                    modifier = Modifier
+                        .padding(bottom = 20.dp)
+                        .fillMaxWidth(),
+                    shape = RectangleShape,
+                    onClick = { } // TODO: Make registration work with API
                 ) {
                     Text(text = "Click to Register")
                 }
