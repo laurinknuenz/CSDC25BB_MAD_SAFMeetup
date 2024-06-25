@@ -40,7 +40,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 fun ActivityCard(
     title: String = "Your Activity",
     type: String = "Training",
-    date: String = "Friday, 28. June 2024",
+    date: String = "Friday, 28. June 2024", // TODO: Change this to date or make it somehow to convert format to german format
     location: String = "FH Campus Wien Gym",
     participates: Boolean = true
 ) {

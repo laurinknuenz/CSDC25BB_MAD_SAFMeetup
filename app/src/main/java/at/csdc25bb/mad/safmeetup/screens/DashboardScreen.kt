@@ -23,14 +23,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import at.csdc25bb.mad.safmeetup.composables.ActivityCard
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
+import at.csdc25bb.mad.safmeetup.composables.datePicker
 import at.csdc25bb.mad.safmeetup.composables.searchBar
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Composable
 fun DashboardScreen(navController: NavHostController) {
     val dashboardPadding = 15.dp
     Scaffold(
         bottomBar = { DashboardProfileBottomBar(navController, true) },
-        ) { innerPadding ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -47,7 +51,9 @@ fun DashboardScreen(navController: NavHostController) {
                     style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 )
             }
-            var searchText: String = searchBar(modifier = Modifier.padding(horizontal = dashboardPadding)) // TODO: Make search filter the lazy list
+            val pickedDate: LocalDate? = datePicker()
+            val searchText: String =
+                searchBar(modifier = Modifier.padding(horizontal = dashboardPadding))
             Divider(
                 modifier = Modifier
                     .width(LocalConfiguration.current.screenWidthDp.dp)
@@ -55,13 +61,70 @@ fun DashboardScreen(navController: NavHostController) {
                     .padding(horizontal = 4.dp),
                 color = MaterialTheme.colorScheme.outline
             )
+
+            // BEGINNING of mocking data for testing
+            val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN)
+            val listOfActivities = mutableListOf<List<String>>()
+            listOfActivities.add(
+                listOf(
+                    "Weekly Training",
+                    "Training",
+                    LocalDate.now().format(dateTimeFormatter),
+                    "FH Campus Gym"
+                )
+            )
+            listOfActivities.add(
+                listOf(
+                    "Game against Eagles",
+                    "Game",
+                    LocalDate.now().plusDays(3).format(dateTimeFormatter),
+                    "FH Technikum Gym"
+                )
+            )
+            listOfActivities.add(
+                listOf(
+                    "Hike",
+                    "Other Activity",
+                    LocalDate.now().plusDays(5).format(dateTimeFormatter),
+                    "Kahlenberg"
+                )
+            )
+            listOfActivities.add(
+                listOf(
+                    "Going to a restaurant",
+                    "Other Activity",
+                    LocalDate.now().plusDays(5).format(dateTimeFormatter),
+                    "Das Zehn"
+                )
+            )
+            // END of mocking data for testing
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = dashboardPadding)
             ) {
-                items(6) {
-                    ActivityCard()
+                val filteredActivities = listOfActivities.filter { activity ->
+                    val matchesSearchText = searchText.isEmpty() ||
+                            activity[0].lowercase().contains(searchText.lowercase()) ||
+                            activity[1].lowercase().contains(searchText.lowercase()) ||
+                            activity[3].lowercase().contains(searchText.lowercase())
+
+                    val matchesPickedDate = pickedDate?.let {
+                        activity[2] == it.format(dateTimeFormatter)
+                    } ?: true
+
+                    matchesSearchText && matchesPickedDate
+                }
+                items(filteredActivities.size) {
+                    val activity =
+                        filteredActivities[it] // TODO: Make the API call here to get the actual activities
+                    ActivityCard(
+                        title = activity[0],
+                        type = activity[1],
+                        date = activity[2],
+                        location = activity[3]
+                    )
                 }
             }
         }
