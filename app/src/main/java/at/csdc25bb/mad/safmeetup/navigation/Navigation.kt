@@ -17,7 +17,7 @@ fun Navigation() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = Screen.Dashboard.route
+        startDestination = Screen.Login.route
     ) {
         composable(route = Screen.Dashboard.route) {
             DashboardScreen(navController = navController)
