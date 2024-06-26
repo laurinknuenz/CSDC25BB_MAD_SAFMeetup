@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import at.csdc25bb.mad.safmeetup.api.loginUser
 import at.csdc25bb.mad.safmeetup.composables.BottomViewSwitcher
 import at.csdc25bb.mad.safmeetup.composables.FullSizeCenteredColumn
 import at.csdc25bb.mad.safmeetup.composables.RegisterLoginHeader
@@ -32,7 +33,8 @@ fun LoginScreen(navController: NavController) {
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.width(IntrinsicSize.Min)) {
+                modifier = Modifier.width(IntrinsicSize.Min)
+            ) {
                 val focusRequester = FocusRequester()
                 val focusManager = LocalFocusManager.current
 
@@ -49,10 +51,12 @@ fun LoginScreen(navController: NavController) {
                     )
                 }
                 Button(
-                    modifier = Modifier.focusRequester(focusRequester)
+                    modifier = Modifier
+                        .focusRequester(focusRequester)
                         .fillMaxWidth(),
                     shape = RectangleShape,
-                    onClick = { }, //TODO: Make login work with API
+                    onClick = { // TODO: Do we need a coroutine here?
+                        loginUser(username, password) }, //TODO: Make login work with API
                 ) {
                     Text(text = "Click to Login")
                 }

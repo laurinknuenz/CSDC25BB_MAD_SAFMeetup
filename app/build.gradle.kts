@@ -50,10 +50,14 @@ android {
 }
 
 dependencies {
+    val retrofitVersion = "2.9.0"
     val fontsVersion = "1.6.7"
     val navVersion = "2.7.7"
     val coreVersion = "1.13.0"
     val lifecycleVersion = "2.7.0"
+
+    implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofitVersion")
 
     implementation ("androidx.compose.material:material-icons-extended")
 
