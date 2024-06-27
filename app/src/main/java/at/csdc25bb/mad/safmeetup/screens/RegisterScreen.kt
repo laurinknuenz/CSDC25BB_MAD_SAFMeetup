@@ -28,8 +28,8 @@ import at.csdc25bb.mad.safmeetup.composables.ErrorMessageText
 import at.csdc25bb.mad.safmeetup.composables.FullSizeCenteredColumn
 import at.csdc25bb.mad.safmeetup.composables.RegisterLoginHeader
 import at.csdc25bb.mad.safmeetup.composables.TitleSubtitleText
+import at.csdc25bb.mad.safmeetup.composables.loginRegisterTextField
 import at.csdc25bb.mad.safmeetup.composables.minimalCheckbox
-import at.csdc25bb.mad.safmeetup.composables.outlinedTextField
 
 @Composable
 fun RegisterScreen(navController: NavController) {
@@ -62,19 +62,19 @@ fun RegisterScreen(navController: NavController) {
                         title = "Register",
                         subtitle = "Enter your data to register."
                     )
-                    username = outlinedTextField("Username", focusRequester)
-                    password = outlinedTextField(
+                    username = loginRegisterTextField("Username", focusRequester)
+                    password = loginRegisterTextField(
                         label = "Password",
                         focusRequester = focusRequester,
                         password = true
                     )
                     Divider(modifier = Modifier.padding(top = 8.dp))
-                    firstName = outlinedTextField("First Name", focusRequester)
-                    lastName = outlinedTextField("Last Name", focusRequester)
-                    email = outlinedTextField("E-Mail Address", focusRequester, true)
+                    firstName = loginRegisterTextField("First Name", focusRequester)
+                    lastName = loginRegisterTextField("Last Name", focusRequester)
+                    email = loginRegisterTextField("E-Mail Address", focusRequester, true)
                     Divider(modifier = Modifier.padding(top = 8.dp))
                     AnimatedVisibility(visible = checked) {
-                        teamCode = outlinedTextField("Team Code", focusRequester)
+                        teamCode = loginRegisterTextField("Team Code", focusRequester)
                     }
                     Row(
                         modifier = Modifier

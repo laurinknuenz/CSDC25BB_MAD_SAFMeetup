@@ -39,6 +39,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 
 @Composable
 fun ActivityCard(
+    id: String = "", // Needed for participation change
     title: String = "Your Activity",
     type: String = "Training",
     date: String = "Friday, 28. June 2024", // TODO: Change this to date or make it somehow to convert format to german format
@@ -76,8 +77,8 @@ fun ActivityCard(
             Row(
                 modifier = Modifier
             ) {
-                ParticipationButton(true, participation) { participation = true }
-                ParticipationButton(false, participation) { participation = false }
+                ParticipationButton(true, participation) { participation = true } // TODO: Add api call here to change participation
+                ParticipationButton(false, participation) { participation = false } // Here too
             }
         }
     }

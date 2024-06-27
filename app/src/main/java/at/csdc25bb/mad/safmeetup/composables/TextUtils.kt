@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,28 +64,24 @@ fun TextWithGoogleFont(text: String, font: String, size: TextUnit) {
 }
 
 @Composable
-fun outlinedTextField(
-    label: String = "",
-    focusRequester: FocusRequester = FocusRequester(),
+fun loginRegisterTextField(
+    label: String,
+    focusRequester: FocusRequester,
     lastField: Boolean = false,
     bottomPadding: Dp = 0.dp,
-    password: Boolean = false,
-    initialValue: String = "",
-    modifier: Modifier = Modifier,
-    onValueChanged: (String) -> Unit = {}
+    password: Boolean = false
 ): String {
     val focusManager = LocalFocusManager.current
-    var variable by remember { mutableStateOf(initialValue) }
+    var variable by remember { mutableStateOf("") }
     var visible by remember { mutableStateOf(false) }
 
     OutlinedTextField(
-        modifier = modifier
+        modifier = Modifier
             .padding(bottom = bottomPadding)
             .focusRequester(focusRequester),
         value = variable,
         onValueChange = {
             variable = it
-            onValueChanged(it)
         },
         label = { Text(label) },
         singleLine = true,
@@ -113,6 +110,33 @@ fun outlinedTextField(
         ),
     )
     return variable
+}
+
+@Composable
+fun ProfileTextField(
+    initialValue: String,
+    onFinishEditing: () -> Unit,
+    onChangeSuccess: (String) -> Unit
+) {
+    var value by remember { mutableStateOf(initialValue) }
+    OutlinedTextField(
+        value = value,
+        onValueChange = { value = it },
+        trailingIcon = {
+            IconButton(onClick = {
+                onFinishEditing()
+                // TODO: Make the API call, if success, execute onChangeSuccess
+                if (true) onChangeSuccess(value)
+            }) {
+                Icon(
+                    imageVector = Icons.Outlined.Check,
+                    contentDescription = "Disable edit mode",
+                )
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true
+    )
 }
 
 @Composable

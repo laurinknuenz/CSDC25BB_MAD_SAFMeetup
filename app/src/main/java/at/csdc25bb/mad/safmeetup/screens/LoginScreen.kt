@@ -20,7 +20,7 @@ import at.csdc25bb.mad.safmeetup.composables.ErrorMessageText
 import at.csdc25bb.mad.safmeetup.composables.FullSizeCenteredColumn
 import at.csdc25bb.mad.safmeetup.composables.RegisterLoginHeader
 import at.csdc25bb.mad.safmeetup.composables.TitleSubtitleText
-import at.csdc25bb.mad.safmeetup.composables.outlinedTextField
+import at.csdc25bb.mad.safmeetup.composables.loginRegisterTextField
 import at.csdc25bb.mad.safmeetup.navigation.Screen
 
 @Composable
@@ -39,8 +39,8 @@ fun LoginScreen(navController: NavController) {
 
                 Column {
                     TitleSubtitleText(title = "Login", subtitle = "Please sign in to continue.")
-                    username = outlinedTextField("Username", focusRequester)
-                    password = outlinedTextField(
+                    username = loginRegisterTextField("Username", focusRequester)
+                    password = loginRegisterTextField(
                         label = "Password",
                         bottomPadding = 20.dp,
                         focusRequester = focusRequester,
