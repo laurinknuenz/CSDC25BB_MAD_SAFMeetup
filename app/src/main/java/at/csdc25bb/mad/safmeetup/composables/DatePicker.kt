@@ -1,9 +1,6 @@
 package at.csdc25bb.mad.safmeetup.composables
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -77,20 +74,15 @@ fun DatePickerItem(
                 style = TextStyle(color = Color.Gray, fontSize = 12.sp),
                 modifier = Modifier.padding(bottom = 3.dp)
             )
-            Box(
+            CustomIconButton(
                 modifier = Modifier
                     .background(
                         color = if (isDateSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
                         shape = CircleShape
                     )
-                    .clickable(
-                        onClick = { onClick(itemDate) },
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    )
                     .width(50.dp)
                     .height(50.dp),
-                contentAlignment = Alignment.Center
+                onClick = { onClick(itemDate) }
             ) {
                 Text(
                     text = itemDate.dayOfMonth.toString(),

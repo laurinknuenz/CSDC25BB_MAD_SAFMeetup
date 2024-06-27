@@ -4,10 +4,7 @@ package at.csdc25bb.mad.safmeetup.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -77,7 +74,9 @@ fun ActivityCard(
             Row(
                 modifier = Modifier
             ) {
-                ParticipationButton(true, participation) { participation = true } // TODO: Add api call here to change participation
+                ParticipationButton(true, participation) {
+                    participation = true
+                } // TODO: Add api call here to change participation
                 ParticipationButton(false, participation) { participation = false } // Here too
             }
         }
@@ -94,7 +93,11 @@ fun ActivityTitleText(title: String, type: String) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = title, style = TextStyle(fontSize = 18.sp), modifier = Modifier.fillMaxWidth(0.7f))
+        Text(
+            text = title,
+            style = TextStyle(fontSize = 18.sp),
+            modifier = Modifier.fillMaxWidth(0.7f)
+        )
         Text(text = type, style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold))
     }
 }
@@ -112,7 +115,7 @@ fun ActivityDetailLine(detail: String, value: String) {
 
 @Composable
 fun ParticipationButton(firstButton: Boolean, participation: Boolean, onClick: () -> Unit) {
-    Box(
+    CustomIconButton(
         modifier = Modifier
             .fillMaxWidth(fraction = if (firstButton) 0.5f else 1f)
             .padding(5.dp)
@@ -122,13 +125,8 @@ fun ParticipationButton(firstButton: Boolean, participation: Boolean, onClick: (
                 else if (!firstButton && !participation) Color(0xFFF13D2F)
                 else MaterialTheme.colorScheme.outline,
                 RoundedCornerShape(15.dp)
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
             ),
-        contentAlignment = Alignment.Center
+        onClick = onClick
     ) {
         Icon(
             imageVector = if (firstButton) Icons.Outlined.ThumbUp else Icons.Outlined.ThumbDown,

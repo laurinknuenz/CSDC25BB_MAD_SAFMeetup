@@ -1,8 +1,6 @@
 package at.csdc25bb.mad.safmeetup.composables
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,7 +24,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -103,7 +100,8 @@ fun ProfilePageTopBar(userProfileSelected: Boolean, onProfileChange: (Boolean) -
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp)
-            .padding(10.dp)
+            .padding(horizontal = 10.dp)
+            .padding(top = 10.dp)
             .background(color = MaterialTheme.colorScheme.primary)
     ) {
         ProfileBarItem(text = "Profile", true, userProfileSelected) {
@@ -124,16 +122,11 @@ fun ProfilePageTopBar(userProfileSelected: Boolean, onProfileChange: (Boolean) -
 
 @Composable
 fun ProfileBarItem(text: String, firstButton: Boolean, selected: Boolean, onClick: () -> Unit) {
-    Box(
+    CustomIconButton(
         modifier = Modifier
             .fillMaxWidth(if (firstButton) 0.5f else 1f)
-            .fillMaxHeight()
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onClick
-            ),
-        contentAlignment = Alignment.Center,
+            .fillMaxHeight(),
+        onClick = onClick
     ) {
         Text(
             text = text,
