@@ -2,6 +2,7 @@ package at.csdc25bb.mad.safmeetup.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,14 +26,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import at.csdc25bb.mad.safmeetup.R
 import at.csdc25bb.mad.safmeetup.composables.AppButton
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
 import at.csdc25bb.mad.safmeetup.composables.ProfilePageTopBar
+import at.csdc25bb.mad.safmeetup.composables.TeamMemberEntry
 import at.csdc25bb.mad.safmeetup.composables.Title
 import at.csdc25bb.mad.safmeetup.composables.profileDetailLine
 import at.csdc25bb.mad.safmeetup.navigation.Screen
@@ -60,7 +67,7 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                             .padding(bottom = 15.dp)
                             .fillMaxWidth()
                     ) {
-                        if (userProfileSelected) UserProfile() else TeamProfile()
+                        if (userProfileSelected) UserProfile() else TeamProfile(userIsAdmin = true) // TODO: Change this to check user role
                     }
                 }
                 item {
@@ -150,13 +157,19 @@ fun TeamProfile(
     manager: String = "Laurin Knünz",
     managerContact: String = "laurin.knunz@gmail.com",
     inviteCode: String = "L4UR1N",
-    members: Map<String, String> = mapOf(
-        "you" to "Laurin Knünz",
-        "" to "Sorin Lazar",
-        "" to "Lilli Jahn",
-        "" to "Mathias Leitgeb",
-        "pending" to "Burak Kongo",
-        "pending" to "Mathias Kerndl"
+    userIsAdmin: Boolean,
+    members: List<List<String>> = listOf(
+        listOf("Admin", "Laurin Knünz", "You"),
+        listOf("Admin", "Sorin Lazar", ""),
+        listOf("User", "Lilli Jahn", ""),
+        listOf("User", "Mathias Leitgeb", ""),
+        listOf("User", "Leon Freudenthaler", ""),
+        listOf("User", "Arik Kofranek", ""),
+        listOf("User", "Fabian Maier", ""),
+        listOf("User", "Burak Kongo", "pending"),
+        listOf("User", "Mathias Kerndl", "pending"),
+        listOf("User", "Rene Goldschmid", "pending"),
+        listOf("User", "Judy Kardouh", "pending"),
     )// TODO: Replace with list of users
 ) {
     var currentTeamName by remember { mutableStateOf(teamName) }
@@ -169,12 +182,25 @@ fun TeamProfile(
         ) {
             Title(currentTeamName, 0.dp)
         }
-        Column {
-            currentTeamName = profileDetailLine(name = "Team name", value = currentTeamName)
-            profileDetailLine(name = "Type of Sport", value = typeOfSport)
+        Column(modifier = Modifier.padding(bottom = 10.dp)) {
+            currentTeamName = profileDetailLine(
+                name = "Team name",
+                value = currentTeamName,
+                editable = userIsAdmin
+            )
+            profileDetailLine(name = "Type of Sport", value = typeOfSport, editable = userIsAdmin)
             profileDetailLine(name = "Manager", value = manager, editable = false)
             profileDetailLine(name = "Contact", value = managerContact, editable = false)
             profileDetailLine(name = "inviteCode", value = inviteCode, editable = false)
+        }
+        Text(text = "Team Members", style = TextStyle(fontSize = 20.sp), modifier = Modifier.padding(vertical = 10.dp))
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .border(1.dp, Color.Black, RoundedCornerShape(3.dp))
+        ) {
+            for (member in members) {
+                TeamMemberEntry(member, userIsAdmin)
+            }
         }
     }
 }

@@ -4,6 +4,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.filled.RemoveCircleOutline
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
@@ -179,4 +187,68 @@ fun profilePasswordTextField(
         label = { Text(label) }
     )
     return password
+}
+
+@Composable
+fun TeamMemberEntry(member: List<String>, userIsAdmin: Boolean) {
+    Row(
+        modifier = Modifier
+
+            .border(0.1.dp, Color.Black)
+            .padding(15.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row {
+            Icon(
+                imageVector = if (member[0] == "Admin") Icons.Default.VerifiedUser else Icons.Default.Person,
+                contentDescription = "Icon of user",
+                modifier = Modifier.padding(end = 10.dp)
+            )
+            Text(text = member[1])
+        }
+        Row {
+            if (userIsAdmin) {
+                if (member[2] != "pending") {
+                    if (member[2] != "You") {
+                        CustomIconButton(
+                            onClick = { }, // TODO: Make/remove user admin
+                        ) {
+                            Icon(
+                                imageVector = if (member[0] != "Admin") Icons.Default.VerifiedUser else Icons.Default.PersonOutline,
+                                contentDescription = if (member[0] == "Admin") "Remove users admin" else "Make user admin"
+                            )
+                        }
+                        CustomIconButton(
+                            onClick = { }, // TODO: Make deletion of user from team work
+                            modifier = Modifier.padding(start = 10.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DeleteOutline,
+                                contentDescription = "Remove user"
+                            )
+                        }
+                    }
+                } else { // TODO: Maybe for all the buttons an additional popup ("Are you sure you want to ...?")
+                    CustomIconButton(
+                        onClick = { }, // TODO: Accept user to team
+                        modifier = Modifier.padding(end = 10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircleOutline,
+                            contentDescription = "Accept user"
+                        )
+                    }
+                    CustomIconButton(
+                        onClick = { }, // TODO: Decline user to team
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.RemoveCircleOutline,
+                            contentDescription = "Decline user"
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
