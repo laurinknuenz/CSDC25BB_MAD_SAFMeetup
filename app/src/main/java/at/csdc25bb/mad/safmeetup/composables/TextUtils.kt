@@ -26,6 +26,7 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -81,6 +82,14 @@ fun searchBar(modifier: Modifier): String {
     return searchText
 }
 
+@Composable
+fun Title(text: String, topPadding: Dp = 10.dp){
+    Text(
+        text = text,
+        style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold),
+        modifier = Modifier.padding(top = topPadding)
+    )
+}
 @Composable
 fun TitleSubtitleText(title: String, subtitle: String) {
     Text(text = buildAnnotatedString {

@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,15 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import at.csdc25bb.mad.safmeetup.R
 import at.csdc25bb.mad.safmeetup.composables.AppButton
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
 import at.csdc25bb.mad.safmeetup.composables.ProfilePageTopBar
+import at.csdc25bb.mad.safmeetup.composables.Title
 import at.csdc25bb.mad.safmeetup.composables.profileDetailLine
 import at.csdc25bb.mad.safmeetup.navigation.Screen
 
@@ -133,11 +130,8 @@ fun UserProfile(
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.outline)
             )
-            Text(
-                text = "$currentFirstName $currentLastName",
-                style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold),
-                modifier = Modifier.padding(top = 10.dp)
-            )
+            Title(text = "$currentFirstName $currentLastName")
+
         }
         Column {
             profileDetailLine(name = "Username", value = userName)
@@ -150,6 +144,37 @@ fun UserProfile(
 }
 
 @Composable
-fun TeamProfile() {
-    Text(text = "Team profile")
+fun TeamProfile(
+    teamName: String = "Laurins Team",
+    typeOfSport: String = "Floorball",
+    manager: String = "Laurin Knünz",
+    managerContact: String = "laurin.knunz@gmail.com",
+    inviteCode: String = "L4UR1N",
+    members: Map<String, String> = mapOf(
+        "you" to "Laurin Knünz",
+        "" to "Sorin Lazar",
+        "" to "Lilli Jahn",
+        "" to "Mathias Leitgeb",
+        "pending" to "Burak Kongo",
+        "pending" to "Mathias Kerndl"
+    )// TODO: Replace with list of users
+) {
+    var currentTeamName by remember { mutableStateOf(teamName) }
+    Column {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp)
+        ) {
+            Title(currentTeamName, 0.dp)
+        }
+        Column {
+            currentTeamName = profileDetailLine(name = "Team name", value = currentTeamName)
+            profileDetailLine(name = "Type of Sport", value = typeOfSport)
+            profileDetailLine(name = "Manager", value = manager, editable = false)
+            profileDetailLine(name = "Contact", value = managerContact, editable = false)
+            profileDetailLine(name = "inviteCode", value = inviteCode, editable = false)
+        }
+    }
 }
