@@ -11,9 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -61,4 +63,13 @@ fun BottomViewSwitcher(question: String, highlightedText: String, navigate: () -
             onClick = { navigate() }
         )
     }
+}
+
+@Composable
+fun ErrorMessageText(errorMessage: String, modifier: Modifier = Modifier) {
+    Text(
+        text = errorMessage,
+        style = TextStyle(fontSize = 12.sp, color = Color.Red),
+        modifier = modifier.padding(top = 4.dp)
+    )
 }

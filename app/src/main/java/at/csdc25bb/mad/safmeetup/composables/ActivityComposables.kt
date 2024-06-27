@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,10 +57,7 @@ fun ActivityCard(
                 .fillMaxSize()
                 .padding(5.dp)
         ) {
-            Row(modifier = Modifier.padding(vertical = 5.dp)) {
-                Text(text = title, style = TextStyle(fontSize = 19.sp))
-                Text(text = " - $type", style = TextStyle(fontSize = 19.sp))
-            }
+            ActivityTitleText(title, type)
             Divider(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,6 +80,21 @@ fun ActivityCard(
                 ParticipationButton(false, participation) { participation = false }
             }
         }
+    }
+}
+
+@Composable
+fun ActivityTitleText(title: String, type: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp)
+            .padding(vertical = 5.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = title, style = TextStyle(fontSize = 18.sp), modifier = Modifier.fillMaxWidth(0.7f))
+        Text(text = type, style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold))
     }
 }
 

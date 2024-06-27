@@ -22,9 +22,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -64,22 +64,28 @@ fun TextWithGoogleFont(text: String, font: String, size: TextUnit) {
 
 @Composable
 fun outlinedTextField(
-    label: String,
-    focusRequester: FocusRequester,
-    focusManager: FocusManager,
+    label: String = "",
+    focusRequester: FocusRequester = FocusRequester(),
     lastField: Boolean = false,
     bottomPadding: Dp = 0.dp,
-    password: Boolean = false
+    password: Boolean = false,
+    initialValue: String = "",
+    modifier: Modifier = Modifier,
+    onValueChanged: (String) -> Unit = {}
 ): String {
-    var variable by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    var variable by remember { mutableStateOf(initialValue) }
     var visible by remember { mutableStateOf(false) }
 
     OutlinedTextField(
-        modifier = Modifier
+        modifier = modifier
             .padding(bottom = bottomPadding)
             .focusRequester(focusRequester),
         value = variable,
-        onValueChange = { variable = it },
+        onValueChange = {
+            variable = it
+            onValueChanged(it)
+        },
         label = { Text(label) },
         singleLine = true,
         visualTransformation = if (password) {
@@ -104,7 +110,7 @@ fun outlinedTextField(
         keyboardActions = KeyboardActions(
             onNext = { focusManager.moveFocus(FocusDirection.Down) },
             onDone = { focusManager.clearFocus() }
-        )
+        ),
     )
     return variable
 }
