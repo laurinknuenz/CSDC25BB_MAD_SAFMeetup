@@ -7,13 +7,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun FullSizeCenteredColumn(
@@ -43,7 +51,11 @@ fun AppButton(text: String, modifier: Modifier = Modifier, onClick: () -> Unit =
 }
 
 @Composable
-fun CustomIconButton(modifier: Modifier = Modifier, onClick: () -> Unit, content: @Composable () -> Unit) {
+fun CustomIconButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
     Box(
         modifier = modifier
             .clickable(
@@ -53,4 +65,60 @@ fun CustomIconButton(modifier: Modifier = Modifier, onClick: () -> Unit, content
             ),
         contentAlignment = Alignment.Center,
     ) { content() }
+}
+
+data class InfoDialogParams(
+    val icon: ImageVector = Icons.Default.Info,
+    val warning: Boolean = false,
+    val title: String = "",
+    val dialogText: String = "",
+    val confirmButtonText: String = "",
+    val onConfirmation: () -> Unit = {}
+)
+
+@Composable
+fun InformationDialog(
+    icon: ImageVector,
+    warning: Boolean,
+    title: String,
+    dialogText: String,
+    confirmButtonText: String,
+    onConfirmation: () -> Unit,
+    closeDialog: () -> Unit
+) {
+    AlertDialog(
+        icon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = "Icon of the dialog",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (warning) Text(text = "WARNING!")
+                Text(text = title, textAlign = TextAlign.Center)
+            }
+        },
+        text = { Text(text = "$dialogText Do you want to continue?") },
+        onDismissRequest = { closeDialog() },
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirmation()
+                closeDialog()
+            }) {
+                Text(text = confirmButtonText)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                closeDialog()
+            }) {
+                Text(text = "Cancel")
+            }
+        }
+    )
 }

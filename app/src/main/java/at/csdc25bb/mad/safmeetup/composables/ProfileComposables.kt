@@ -190,7 +190,11 @@ fun profilePasswordTextField(
 }
 
 @Composable
-fun TeamMemberEntry(member: List<String>, userIsAdmin: Boolean) {
+fun TeamMemberEntry(
+    member: List<String>,
+    userIsAdmin: Boolean,
+    onIconClick: (ImageVector, Boolean, String, String, String, () -> Unit) -> Unit,
+) {
     Row(
         modifier = Modifier
 
@@ -211,40 +215,94 @@ fun TeamMemberEntry(member: List<String>, userIsAdmin: Boolean) {
             if (userIsAdmin) {
                 if (member[2] != "pending") {
                     if (member[2] != "You") {
+                        val memberIsAdmin = member[0] == "Admin"
+                        val adminIcon =
+                            if (!memberIsAdmin) Icons.Default.VerifiedUser else Icons.Default.PersonOutline
+                        val adminAction = "${if (memberIsAdmin) "Revoke" else "Grant"} rights"
                         CustomIconButton(
-                            onClick = { }, // TODO: Make/remove user admin
+                            onClick = {
+                                onIconClick(
+                                    adminIcon,
+                                    false,
+                                    if (memberIsAdmin) "Admin Removal" else "Admin Addition",
+                                    "You're about to ${if (memberIsAdmin) "revoke the admin rights of" else "grant admin rights to"} ${member[1]}.",
+                                    adminAction
+                                ) {
+                                    if (memberIsAdmin) {
+                                        // TODO: API call to make user admin
+                                    } else {
+                                        // TODO: API call to remove users admin rights
+                                    }
+                                }
+                            },
                         ) {
                             Icon(
-                                imageVector = if (member[0] != "Admin") Icons.Default.VerifiedUser else Icons.Default.PersonOutline,
-                                contentDescription = if (member[0] == "Admin") "Remove users admin" else "Make user admin"
+                                imageVector = adminIcon,
+                                contentDescription = adminAction
                             )
                         }
+                        val removeIcon = Icons.Default.DeleteOutline
+                        val removeAction = "Remove user"
                         CustomIconButton(
-                            onClick = { }, // TODO: Make deletion of user from team work
+                            onClick = {
+                                onIconClick(
+                                    removeIcon,
+                                    true,
+                                    "Remove User from Team",
+                                    "You're about to remove ${member[1]} from the team.",
+                                    removeAction
+                                ) {
+                                    // TODO: API call to remove user from team
+                                }
+                            },
                             modifier = Modifier.padding(start = 10.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.DeleteOutline,
-                                contentDescription = "Remove user"
+                                imageVector = removeIcon,
+                                contentDescription = removeAction
                             )
                         }
                     }
-                } else { // TODO: Maybe for all the buttons an additional popup ("Are you sure you want to ...?")
+                } else {
+                    val acceptIcon = Icons.Default.CheckCircleOutline
+                    val acceptAction = "Accept user"
                     CustomIconButton(
-                        onClick = { }, // TODO: Accept user to team
+                        onClick = {
+                            onIconClick(
+                                acceptIcon,
+                                false,
+                                "Accept User to Team",
+                                "You're about to accept ${member[1]} to the team.",
+                                acceptAction
+                            ) {
+                                // TODO: API call to accept user to team
+                            }
+                        },
                         modifier = Modifier.padding(end = 10.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.CheckCircleOutline,
-                            contentDescription = "Accept user"
+                            imageVector = acceptIcon,
+                            contentDescription = acceptAction
                         )
                     }
+                    val declineIcon = Icons.Default.RemoveCircleOutline
+                    val declineAction = "Decline user"
                     CustomIconButton(
-                        onClick = { }, // TODO: Decline user to team
+                        onClick = {
+                            onIconClick(
+                                declineIcon,
+                                true,
+                                "Decline User from Team",
+                                "You're about to decline ${member[1]} from the team.",
+                                declineAction
+                            ) {
+                                // TODO: API call to decline user from team
+                            }
+                        },
                     ) {
                         Icon(
-                            imageVector = Icons.Default.RemoveCircleOutline,
-                            contentDescription = "Decline user"
+                            imageVector = declineIcon,
+                            contentDescription = declineAction
                         )
                     }
                 }

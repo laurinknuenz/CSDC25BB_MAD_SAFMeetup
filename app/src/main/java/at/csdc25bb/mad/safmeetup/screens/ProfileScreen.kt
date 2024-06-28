@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.GroupOff
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -36,6 +41,8 @@ import androidx.navigation.NavHostController
 import at.csdc25bb.mad.safmeetup.R
 import at.csdc25bb.mad.safmeetup.composables.AppButton
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
+import at.csdc25bb.mad.safmeetup.composables.InfoDialogParams
+import at.csdc25bb.mad.safmeetup.composables.InformationDialog
 import at.csdc25bb.mad.safmeetup.composables.ProfilePageTopBar
 import at.csdc25bb.mad.safmeetup.composables.TeamMemberEntry
 import at.csdc25bb.mad.safmeetup.composables.Title
@@ -44,67 +51,139 @@ import at.csdc25bb.mad.safmeetup.navigation.Screen
 
 @Composable
 fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
+    var userProfileSelected by remember { mutableStateOf(true) }
     val profilePadding = 15.dp
     Scaffold(
+        topBar = {
+            ProfilePageTopBar(userProfileSelected) { value -> userProfileSelected = value }
+        },
         bottomBar = { DashboardProfileBottomBar(navController, false) }
     ) { innerPadding ->
-        Column(
+        var openInformationDialog by remember { mutableStateOf(false) }
+        var infoDialogParams by remember {
+            mutableStateOf(InfoDialogParams())
+        }
+        if (openInformationDialog) {
+            InformationDialog(
+                icon = infoDialogParams.icon,
+                warning = infoDialogParams.warning,
+                title = infoDialogParams.title,
+                dialogText = infoDialogParams.dialogText,
+                confirmButtonText = infoDialogParams.confirmButtonText,
+                onConfirmation = infoDialogParams.onConfirmation,
+                closeDialog = { openInformationDialog = false }
+            )
+        }
+
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            var userProfileSelected by remember { mutableStateOf(true) }
-            ProfilePageTopBar(userProfileSelected) { value -> userProfileSelected = value }
-            LazyColumn(
-                modifier = Modifier.fillMaxHeight(),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = profilePadding)
-                            .padding(top = 10.dp)
-                            .padding(bottom = 15.dp)
-                            .fillMaxWidth()
-                    ) {
-                        if (userProfileSelected) UserProfile() else TeamProfile(userIsAdmin = true) // TODO: Change this to check user role
-                    }
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = profilePadding)
+                        .padding(top = 10.dp)
+                        .padding(bottom = 15.dp)
+                        .fillMaxWidth()
+                ) {
+                    if (userProfileSelected) UserProfile()
+                    else TeamProfile(
+                        userIsAdmin = true, // TODO: Change this to check user role
+                        onIconClick = { icon: ImageVector, warning: Boolean, title: String,
+                                        dialogText: String, confirmButtonText: String, onClick: () -> Unit ->
+                            infoDialogParams = InfoDialogParams(
+                                icon = icon,
+                                warning = warning,
+                                title = title,
+                                dialogText = dialogText,
+                                confirmButtonText = confirmButtonText
+                            ) { onClick() }
+                            openInformationDialog = true
+                        }
+                    )
                 }
-                item {
-                    Column(modifier = Modifier.padding(horizontal = profilePadding)) {
-                        if (userProfileSelected) {
-                            AppButton(
-                                text = "Sign out",
-                                onClick = { navController.navigate(Screen.Login.route) }) // TODO: make it work
-                            AppButton(text = "Delete my Account") // TODO: make it work
-                        } else
-                            Column {
-
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    AppButton(
-                                        text = "Join new Team",
-                                        modifier = Modifier.fillMaxWidth(0.49f),
-                                        onClick = { } // TODO: make it work
-                                    )
-                                    AppButton(
-                                        text = "Create new Team",
-                                        modifier = Modifier.fillMaxWidth(0.96f),
-                                        onClick = { } // TODO: make it work
-                                    )
-                                }
-                                if (manager) AppButton(
-                                    text = "Delete this Team",
-                                    onClick = {} // TODO: make it work
-                                )
-                                else AppButton(
-                                    text = "Leave this Team",
-                                    onClick = {} // TODO: make it work
-                                )
+            }
+            item {
+                Column(modifier = Modifier.padding(horizontal = profilePadding)) {
+                    if (userProfileSelected) {
+                        AppButton(
+                            text = "Sign out"
+                        ) {
+                            infoDialogParams = InfoDialogParams(
+                                icon = Icons.Default.Logout,
+                                title = "Signing out",
+                                dialogText = "You're about to sign out.",
+                                confirmButtonText = "Sign out"
+                            ) {
+                                // TODO: Make the API call to logout here
+                                navController.navigate(Screen.Login.route)
                             }
-                    }
+                            openInformationDialog = true
+                        }
+                        AppButton(
+                            text = "Delete my Account"
+                        ) {
+                            infoDialogParams = InfoDialogParams(
+                                icon = Icons.Default.PersonOff,
+                                warning = true,
+                                title = "Account Deletion",
+                                dialogText = "You're about to DELETE YOUR ACCOUNT!",
+                                confirmButtonText = "Delete Account"
+                            ) {
+                                // TODO: Make the API call to delete account here
+                            }
+                            openInformationDialog = true
+                        }
+                    } else
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                AppButton(
+                                    text = "Join new Team",
+                                    modifier = Modifier.fillMaxWidth(0.49f)
+                                ) {
+                                    // TODO: Push-up composable here and API call inside
+                                }
+                                AppButton(
+                                    text = "Create new Team",
+                                    modifier = Modifier.fillMaxWidth(0.96f)
+                                ) {
+                                    // TODO: Push-up composable here and API call inside
+                                }
+                            }
+                            if (manager) AppButton(
+                                text = "Delete this Team"
+                            ) {
+                                infoDialogParams = InfoDialogParams(
+                                    icon = Icons.Default.GroupOff,
+                                    warning = true,
+                                    title = "Team Deletion",
+                                    dialogText = "You're about to DELETE THIS TEAM!",
+                                    confirmButtonText = "Delete Team"
+                                ) {
+                                    // TODO: Make the API call to delete the team here
+                                }
+                                openInformationDialog = true
+                            }
+                            else AppButton(
+                                text = "Leave this Team"
+                            ) {
+                                infoDialogParams = InfoDialogParams(
+                                    icon = Icons.Default.ExitToApp,
+                                    title = "Leaving this Team",
+                                    dialogText = "You're about to leave this team.",
+                                    confirmButtonText = "Leave Team"
+                                ) {
+                                    // TODO: Make the API call to leave the team here
+                                }
+                                openInformationDialog = true
+                            }
+                        }
                 }
             }
         }
@@ -114,7 +193,7 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
 
 @Composable
 fun UserProfile(
-    profilePicture: Painter = painterResource(id = R.drawable.logo_app),
+    profilePicture: Painter = painterResource(id = R.drawable.logo_app), // TODO: Change this to pass only a mapped user object
     userName: String = "laurinknunz",
     firstName: String = "Laurin",
     lastName: String = "Knünz",
@@ -152,12 +231,13 @@ fun UserProfile(
 
 @Composable
 fun TeamProfile(
-    teamName: String = "Laurins Team",
+    teamName: String = "Laurins Team", // TODO: Change this to pass only a mapped team object
     typeOfSport: String = "Floorball",
     manager: String = "Laurin Knünz",
     managerContact: String = "laurin.knunz@gmail.com",
     inviteCode: String = "L4UR1N",
     userIsAdmin: Boolean,
+    onIconClick: (ImageVector, Boolean, String, String, String, () -> Unit) -> Unit,
     members: List<List<String>> = listOf(
         listOf("Admin", "Laurin Knünz", "You"),
         listOf("Admin", "Sorin Lazar", ""),
@@ -188,19 +268,29 @@ fun TeamProfile(
                 value = currentTeamName,
                 editable = userIsAdmin
             )
-            profileDetailLine(name = "Type of Sport", value = typeOfSport, editable = userIsAdmin)
+            profileDetailLine(
+                name = "Type of Sport",
+                value = typeOfSport,
+                editable = userIsAdmin
+            )
             profileDetailLine(name = "Manager", value = manager, editable = false)
             profileDetailLine(name = "Contact", value = managerContact, editable = false)
             profileDetailLine(name = "inviteCode", value = inviteCode, editable = false)
         }
-        Text(text = "Team Members", style = TextStyle(fontSize = 20.sp), modifier = Modifier.padding(vertical = 10.dp))
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .border(1.dp, Color.Black, RoundedCornerShape(3.dp))
+        Text(
+            text = "Team Members",
+            style = TextStyle(fontSize = 20.sp),
+            modifier = Modifier.padding(vertical = 10.dp)
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .border(1.dp, Color.Black, RoundedCornerShape(3.dp))
         ) {
             for (member in members) {
-                TeamMemberEntry(member, userIsAdmin)
+                TeamMemberEntry(member, userIsAdmin, onIconClick)
             }
         }
     }
 }
+
