@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -59,6 +58,7 @@ import at.csdc25bb.mad.safmeetup.navigation.Screen
 @Composable
 fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
     var userProfileSelected by remember { mutableStateOf(true) }
+    var chosenTeam by remember { mutableStateOf("Laurins Team") }
     val userIsPartOfTeam = true
 
     var openInformationDialog by remember { mutableStateOf(false) }
@@ -83,15 +83,21 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
     val profilePadding = 15.dp
     Scaffold(
         topBar = {
-            ProfilePageTopBar(userProfileSelected,{ value -> userProfileSelected = value }) {
-                bottomSheetContent = { TeamSwitchBottomSheet() }
+            ProfilePageTopBar(userProfileSelected, { value -> userProfileSelected = value }) {
+                bottomSheetContent = { TeamSwitchBottomSheet(onChoosing = {newTeam ->
+                    chosenTeam = newTeam
+                    showBottomSheet = false
+                    navController.navigate(Screen.Profile.route)
+                }) }
                 showBottomSheet = true
             }
         },
-        bottomBar = { DashboardProfileBottomBar(navController, false){
-            bottomSheetContent = { ActivityCreationBottomSheet() }
-            showBottomSheet = true
-        } }
+        bottomBar = {
+            DashboardProfileBottomBar(navController, false) {
+                bottomSheetContent = { ActivityCreationBottomSheet() }
+                showBottomSheet = true
+            }
+        }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -173,7 +179,10 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                                     text = "Create new Team",
                                     modifier = Modifier.fillMaxWidth(0.96f)
                                 ) {
-                                    bottomSheetContent = { TeamCreationBottomSheet() }
+                                    bottomSheetContent = { TeamCreationBottomSheet{
+                                        showBottomSheet = false
+                                        navController.navigate(Screen.Dashboard.route)
+                                    } }
                                     showBottomSheet = true
                                 }
                             }
@@ -309,7 +318,7 @@ fun TeamProfile(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .border(1.dp, Color.Black, RoundedCornerShape(3.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(3.dp))
         ) {
             membersList = membersList
                 .sortedWith(compareBy(

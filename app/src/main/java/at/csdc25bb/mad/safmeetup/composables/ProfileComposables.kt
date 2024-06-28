@@ -23,6 +23,7 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -200,7 +201,7 @@ fun TeamMemberEntry(
     Row(
         modifier = Modifier
 
-            .border(0.1.dp, Color.Black)
+            .border(0.1.dp, MaterialTheme.colorScheme.outline)
             .padding(15.dp)
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
