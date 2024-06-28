@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -87,7 +88,8 @@ fun Title(text: String, topPadding: Dp = 10.dp){
     Text(
         text = text,
         style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold),
-        modifier = Modifier.padding(top = topPadding)
+        modifier = Modifier.padding(top = topPadding),
+        textAlign = TextAlign.Center
     )
 }
 @Composable

@@ -35,6 +35,8 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -52,6 +54,7 @@ import at.csdc25bb.mad.safmeetup.navigation.Screen
 @Composable
 fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
     var userProfileSelected by remember { mutableStateOf(true) }
+    val userIsPartOfTeam = true
     val profilePadding = 15.dp
     Scaffold(
         topBar = {
@@ -90,7 +93,7 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                         .fillMaxWidth()
                 ) {
                     if (userProfileSelected) UserProfile()
-                    else TeamProfile(
+                    else if (userIsPartOfTeam) TeamProfile(
                         userIsAdmin = true, // TODO: Change this to check user role
                         onIconClick = { icon: ImageVector, warning: Boolean, title: String,
                                         dialogText: String, confirmButtonText: String, onClick: () -> Unit ->
@@ -104,6 +107,7 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                             openInformationDialog = true
                         }
                     )
+                    else NoTeamScreen()
                 }
             }
             item {
@@ -156,32 +160,34 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                                     // TODO: Push-up composable here and API call inside
                                 }
                             }
-                            if (manager) AppButton(
-                                text = "Delete this Team"
-                            ) {
-                                infoDialogParams = InfoDialogParams(
-                                    icon = Icons.Default.GroupOff,
-                                    warning = true,
-                                    title = "Team Deletion",
-                                    dialogText = "You're about to DELETE THIS TEAM!",
-                                    confirmButtonText = "Delete Team"
+                            if (userIsPartOfTeam) {
+                                if (manager) AppButton(
+                                    text = "Delete this Team"
                                 ) {
-                                    // TODO: Make the API call to delete the team here
+                                    infoDialogParams = InfoDialogParams(
+                                        icon = Icons.Default.GroupOff,
+                                        warning = true,
+                                        title = "Team Deletion",
+                                        dialogText = "You're about to DELETE THIS TEAM!",
+                                        confirmButtonText = "Delete Team"
+                                    ) {
+                                        // TODO: Make the API call to delete the team here
+                                    }
+                                    openInformationDialog = true
                                 }
-                                openInformationDialog = true
-                            }
-                            else AppButton(
-                                text = "Leave this Team"
-                            ) {
-                                infoDialogParams = InfoDialogParams(
-                                    icon = Icons.Default.ExitToApp,
-                                    title = "Leaving this Team",
-                                    dialogText = "You're about to leave this team.",
-                                    confirmButtonText = "Leave Team"
+                                else AppButton(
+                                    text = "Leave this Team"
                                 ) {
-                                    // TODO: Make the API call to leave the team here
+                                    infoDialogParams = InfoDialogParams(
+                                        icon = Icons.Default.ExitToApp,
+                                        title = "Leaving this Team",
+                                        dialogText = "You're about to leave this team.",
+                                        confirmButtonText = "Leave Team"
+                                    ) {
+                                        // TODO: Make the API call to leave the team here
+                                    }
+                                    openInformationDialog = true
                                 }
-                                openInformationDialog = true
                             }
                         }
                 }
@@ -306,6 +312,29 @@ fun TeamProfile(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun NoTeamScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 40.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "You are still part \n of no team!",
+            textAlign = TextAlign.Center,
+            style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(bottom = 15.dp)
+        )
+        Text(
+            text = "Join or create a new team with the buttons you see on the bottom.",
+            textAlign = TextAlign.Center,
+            style = TextStyle(fontSize = 20.sp, )
+        )
     }
 }
 
