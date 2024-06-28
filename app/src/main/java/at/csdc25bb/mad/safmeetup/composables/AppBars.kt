@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.SwapHorizontalCircle
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
@@ -38,7 +40,8 @@ import at.csdc25bb.mad.safmeetup.navigation.Screen
 fun DashboardProfileBottomBar(
     navController: NavController,
     showDashboard: Boolean,
-    manager: Boolean = true
+    manager: Boolean = true,
+    onActivityCreation: () -> Unit
 ) {
     BottomAppBar(tonalElevation = 0.dp) {
         Box {
@@ -65,7 +68,7 @@ fun DashboardProfileBottomBar(
                 if (manager) {
                     Button(
                         onClick = {
-                            // TODO: Add activity
+                            onActivityCreation()
                         },
                         shape = RectangleShape,
                         modifier = Modifier.size(50.dp),
@@ -95,7 +98,11 @@ fun DashboardProfileBottomBar(
 }
 
 @Composable
-fun ProfilePageTopBar(userProfileSelected: Boolean, onProfileChange: (Boolean) -> Unit) {
+fun ProfilePageTopBar(
+    userProfileSelected: Boolean,
+    showDashboard: (Boolean) -> Unit,
+    onTeamSwitch: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -104,8 +111,8 @@ fun ProfilePageTopBar(userProfileSelected: Boolean, onProfileChange: (Boolean) -
             .padding(top = 10.dp)
             .background(color = MaterialTheme.colorScheme.primary)
     ) {
-        ProfileBarItem(text = "Profile", true, userProfileSelected) {
-            onProfileChange(true)
+        ProfileBarItem(text = "Profile", true, userProfileSelected, null) {
+            showDashboard(true)
         }
         Divider(
             modifier = Modifier
@@ -114,27 +121,50 @@ fun ProfilePageTopBar(userProfileSelected: Boolean, onProfileChange: (Boolean) -
                 .width(1.dp),
             color = Color.White
         )
-        ProfileBarItem(text = "My Team", false, !userProfileSelected) {
-            onProfileChange(false)
+        ProfileBarItem(text = "My Team", false, !userProfileSelected, onTeamSwitch) {
+            showDashboard(false)
         }
     }
 }
 
 @Composable
-fun ProfileBarItem(text: String, firstButton: Boolean, selected: Boolean, onClick: () -> Unit) {
+fun ProfileBarItem(
+    text: String,
+    firstButton: Boolean,
+    selected: Boolean,
+    onTeamSwitch: (() -> Unit)?,
+    onClick: () -> Unit
+) {
     CustomIconButton(
         modifier = Modifier
             .fillMaxWidth(if (firstButton) 0.5f else 1f)
             .fillMaxHeight(),
         onClick = onClick
     ) {
-        Text(
-            text = text,
-            style = TextStyle(
-                fontSize = 18.sp, color = if (selected) Color.White else Color(
-                    0xFFF8C382
-                )
-            )
-        )
+        val textStyle =
+            TextStyle(fontSize = 18.sp, color = if (selected) Color.White else Color(0xFFF8C382))
+        if (onTeamSwitch == null) {
+            Text(text = text, style = textStyle)
+        } else {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(text = text, style = textStyle, modifier = Modifier.padding(end = 10.dp))
+                CustomIconButton(onClick = { if(selected) onTeamSwitch() else onClick() }) {
+                    Icon(
+                        imageVector = Icons.Default.SwapHorizontalCircle,
+                        contentDescription = "Switch teams",
+                        tint = if (selected) Color.White else Color(0xFFF8C382)
+                    )
+                }
+            }
+        }
     }
+}
+
+@Composable
+fun ActivityTopBar(){
+
 }

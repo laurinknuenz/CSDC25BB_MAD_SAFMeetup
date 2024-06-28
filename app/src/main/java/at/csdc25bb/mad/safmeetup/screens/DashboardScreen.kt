@@ -14,6 +14,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
@@ -22,9 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import at.csdc25bb.mad.safmeetup.composables.ActivityCard
+import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
+import at.csdc25bb.mad.safmeetup.composables.AdvancedFilterBottomSheet
+import at.csdc25bb.mad.safmeetup.composables.BottomSheet
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
 import at.csdc25bb.mad.safmeetup.composables.datePicker
 import at.csdc25bb.mad.safmeetup.composables.searchBar
+import at.csdc25bb.mad.safmeetup.navigation.Screen
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -32,8 +40,17 @@ import java.util.Locale
 @Composable
 fun DashboardScreen(navController: NavHostController) {
     val dashboardPadding = 15.dp
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var bottomSheetContent by remember { mutableStateOf<@Composable () -> Unit>({}) }
+    BottomSheet(showBottomSheet, { showBottomSheet = false }) { bottomSheetContent() }
+
     Scaffold(
-        bottomBar = { DashboardProfileBottomBar(navController, true) },
+        bottomBar = {
+            DashboardProfileBottomBar(navController, true) {
+                bottomSheetContent = { ActivityCreationBottomSheet() }
+                showBottomSheet = true
+            }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -53,7 +70,10 @@ fun DashboardScreen(navController: NavHostController) {
             }
             val pickedDate: LocalDate? = datePicker()
             val searchText: String =
-                searchBar(modifier = Modifier.padding(horizontal = dashboardPadding))
+                searchBar(modifier = Modifier.padding(horizontal = dashboardPadding)) {
+                    bottomSheetContent = { AdvancedFilterBottomSheet() }
+                    showBottomSheet = true
+                }
             Divider(
                 modifier = Modifier
                     .width(LocalConfiguration.current.screenWidthDp.dp)
@@ -124,7 +144,9 @@ fun DashboardScreen(navController: NavHostController) {
                         type = activity[1],
                         date = activity[2],
                         location = activity[3]
-                    )
+                    ) {
+                        navController.navigate(Screen.Activity.route) // TODO: Somehow pass the activity or activities ID into activity screen here
+                    }
                 }
             }
         }

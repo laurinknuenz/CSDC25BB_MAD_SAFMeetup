@@ -4,6 +4,7 @@ package at.csdc25bb.mad.safmeetup.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,7 +42,8 @@ fun ActivityCard(
     type: String = "Training",
     date: String = "Friday, 28. June 2024", // TODO: Change this to date or make it somehow to convert format to german format
     location: String = "FH Campus Wien Gym",
-    participates: Boolean = true
+    participates: Boolean = true,
+    onClick: () -> Unit
 ) {
     var participation by remember { mutableStateOf(participates) }
     Column(
@@ -49,6 +51,7 @@ fun ActivityCard(
             .fillMaxWidth()
             .padding(5.dp)
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
+            .clickable(onClick = { onClick() })
     ) {
         Column(
             modifier = Modifier
@@ -135,4 +138,14 @@ fun ParticipationButton(firstButton: Boolean, participation: Boolean, onClick: (
             modifier = Modifier.size(30.dp)
         )
     }
+}
+
+@Composable
+fun ActivityCreationBottomSheet() {
+    Text(text = "Activity Creation")
+}
+
+@Composable
+fun AdvancedFilterBottomSheet() {
+    Text(text = "Advanced Filter")
 }

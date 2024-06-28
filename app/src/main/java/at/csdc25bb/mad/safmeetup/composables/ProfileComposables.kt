@@ -196,7 +196,7 @@ fun TeamMemberEntry(
     onIconClick: (ImageVector, Boolean, String, String, String, () -> Unit) -> Unit,
     onChangeSuccess: (List<String>?) -> Unit
 ) {
-    var currentMember = member.toMutableList();
+    val currentMember = member.toMutableList()
     Row(
         modifier = Modifier
 

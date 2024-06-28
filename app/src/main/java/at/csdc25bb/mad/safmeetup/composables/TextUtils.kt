@@ -1,5 +1,6 @@
 package at.csdc25bb.mad.safmeetup.composables
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -54,7 +55,7 @@ fun TextWithGoogleFont(text: String, font: String, size: TextUnit) {
 }
 
 @Composable
-fun searchBar(modifier: Modifier): String {
+fun searchBar(modifier: Modifier, onClickAdvancedFilter: () -> Unit): String {
     var searchText by remember { mutableStateOf("") }
 
     OutlinedTextField(
@@ -67,6 +68,7 @@ fun searchBar(modifier: Modifier): String {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .padding(end = 10.dp)
+                    .clickable(onClick = { onClickAdvancedFilter() })
             ) {
                 Text(text = "Advanced", style = TextStyle(fontSize = 14.sp))
                 Text(text = "Filter", style = TextStyle(fontSize = 14.sp))
@@ -84,7 +86,7 @@ fun searchBar(modifier: Modifier): String {
 }
 
 @Composable
-fun Title(text: String, topPadding: Dp = 10.dp){
+fun Title(text: String, topPadding: Dp = 10.dp) {
     Text(
         text = text,
         style = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold),
@@ -92,6 +94,7 @@ fun Title(text: String, topPadding: Dp = 10.dp){
         textAlign = TextAlign.Center
     )
 }
+
 @Composable
 fun TitleSubtitleText(title: String, subtitle: String) {
     Text(text = buildAnnotatedString {

@@ -41,12 +41,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import at.csdc25bb.mad.safmeetup.R
+import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.AppButton
+import at.csdc25bb.mad.safmeetup.composables.BottomSheet
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
 import at.csdc25bb.mad.safmeetup.composables.InfoDialogParams
 import at.csdc25bb.mad.safmeetup.composables.InformationDialog
 import at.csdc25bb.mad.safmeetup.composables.ProfilePageTopBar
+import at.csdc25bb.mad.safmeetup.composables.TeamCreationBottomSheet
+import at.csdc25bb.mad.safmeetup.composables.TeamJoiningBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.TeamMemberEntry
+import at.csdc25bb.mad.safmeetup.composables.TeamSwitchBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.Title
 import at.csdc25bb.mad.safmeetup.composables.profileDetailLine
 import at.csdc25bb.mad.safmeetup.navigation.Screen
@@ -55,29 +60,39 @@ import at.csdc25bb.mad.safmeetup.navigation.Screen
 fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
     var userProfileSelected by remember { mutableStateOf(true) }
     val userIsPartOfTeam = true
+
+    var openInformationDialog by remember { mutableStateOf(false) }
+    var infoDialogParams by remember {
+        mutableStateOf(InfoDialogParams())
+    }
+    if (openInformationDialog) {
+        InformationDialog(
+            icon = infoDialogParams.icon,
+            warning = infoDialogParams.warning,
+            title = infoDialogParams.title,
+            dialogText = infoDialogParams.dialogText,
+            confirmButtonText = infoDialogParams.confirmButtonText,
+            onConfirmation = infoDialogParams.onConfirmation,
+            closeDialog = { openInformationDialog = false }
+        )
+    }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var bottomSheetContent by remember { mutableStateOf<@Composable () -> Unit>({}) }
+    BottomSheet(showBottomSheet, { showBottomSheet = false }) { bottomSheetContent() }
+
     val profilePadding = 15.dp
     Scaffold(
         topBar = {
-            ProfilePageTopBar(userProfileSelected) { value -> userProfileSelected = value }
+            ProfilePageTopBar(userProfileSelected,{ value -> userProfileSelected = value }) {
+                bottomSheetContent = { TeamSwitchBottomSheet() }
+                showBottomSheet = true
+            }
         },
-        bottomBar = { DashboardProfileBottomBar(navController, false) }
+        bottomBar = { DashboardProfileBottomBar(navController, false){
+            bottomSheetContent = { ActivityCreationBottomSheet() }
+            showBottomSheet = true
+        } }
     ) { innerPadding ->
-        var openInformationDialog by remember { mutableStateOf(false) }
-        var infoDialogParams by remember {
-            mutableStateOf(InfoDialogParams())
-        }
-        if (openInformationDialog) {
-            InformationDialog(
-                icon = infoDialogParams.icon,
-                warning = infoDialogParams.warning,
-                title = infoDialogParams.title,
-                dialogText = infoDialogParams.dialogText,
-                confirmButtonText = infoDialogParams.confirmButtonText,
-                onConfirmation = infoDialogParams.onConfirmation,
-                closeDialog = { openInformationDialog = false }
-            )
-        }
-
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
@@ -151,13 +166,15 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                                     text = "Join new Team",
                                     modifier = Modifier.fillMaxWidth(0.49f)
                                 ) {
-                                    // TODO: Push-up composable here and API call inside
+                                    bottomSheetContent = { TeamJoiningBottomSheet() }
+                                    showBottomSheet = true
                                 }
                                 AppButton(
                                     text = "Create new Team",
                                     modifier = Modifier.fillMaxWidth(0.96f)
                                 ) {
-                                    // TODO: Push-up composable here and API call inside
+                                    bottomSheetContent = { TeamCreationBottomSheet() }
+                                    showBottomSheet = true
                                 }
                             }
                             if (userIsPartOfTeam) {
@@ -333,7 +350,7 @@ fun NoTeamScreen() {
         Text(
             text = "Join or create a new team with the buttons you see on the bottom.",
             textAlign = TextAlign.Center,
-            style = TextStyle(fontSize = 20.sp, )
+            style = TextStyle(fontSize = 20.sp)
         )
     }
 }
