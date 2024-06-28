@@ -238,21 +238,22 @@ fun TeamProfile(
     inviteCode: String = "L4UR1N",
     userIsAdmin: Boolean,
     onIconClick: (ImageVector, Boolean, String, String, String, () -> Unit) -> Unit,
-    members: List<List<String>> = listOf(
-        listOf("Admin", "Laurin Knünz", "You"),
-        listOf("Admin", "Sorin Lazar", ""),
-        listOf("User", "Lilli Jahn", ""),
-        listOf("User", "Mathias Leitgeb", ""),
-        listOf("User", "Leon Freudenthaler", ""),
-        listOf("User", "Arik Kofranek", ""),
-        listOf("User", "Fabian Maier", ""),
-        listOf("User", "Burak Kongo", "pending"),
-        listOf("User", "Mathias Kerndl", "pending"),
-        listOf("User", "Rene Goldschmid", "pending"),
-        listOf("User", "Judy Kardouh", "pending"),
+    members: MutableList<List<String>> = mutableListOf(
+        mutableListOf("Admin", "Laurin Knünz", "You"),
+        mutableListOf("Admin", "Sorin Lazar", ""),
+        mutableListOf("User", "Lilli Jahn", ""),
+        mutableListOf("User", "Mathias Leitgeb", ""),
+        mutableListOf("User", "Leon Freudenthaler", ""),
+        mutableListOf("User", "Arik Kofranek", ""),
+        mutableListOf("User", "Fabian Maier", ""),
+        mutableListOf("User", "Burak Kongo", "pending"),
+        mutableListOf("User", "Mathias Kerndl", "pending"),
+        mutableListOf("User", "Rene Goldschmid", "pending"),
+        mutableListOf("User", "Judy Kardouh", "pending"),
     )// TODO: Replace with list of users
 ) {
     var currentTeamName by remember { mutableStateOf(teamName) }
+    var membersList by remember { mutableStateOf(members) }
     Column {
         Box(
             contentAlignment = Alignment.Center,
@@ -287,8 +288,22 @@ fun TeamProfile(
                 .fillMaxSize()
                 .border(1.dp, Color.Black, RoundedCornerShape(3.dp))
         ) {
-            for (member in members) {
-                TeamMemberEntry(member, userIsAdmin, onIconClick)
+            membersList = membersList
+                .sortedWith(compareBy(
+                    { it[2] != "You" },
+                    { it[2] != "" },
+                    { it[2] != "pending" },
+                    { it[0] != "Admin" },
+                    { it[1] }
+                ))
+                .toMutableList()
+
+            for (member in membersList) {
+                TeamMemberEntry(member, userIsAdmin, onIconClick) { changedMember ->
+                    membersList = membersList.mapNotNull {
+                        if (it == member) changedMember else it
+                    }.toMutableList()
+                }
             }
         }
     }

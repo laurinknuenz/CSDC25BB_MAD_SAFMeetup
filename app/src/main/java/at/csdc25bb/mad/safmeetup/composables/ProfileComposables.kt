@@ -194,7 +194,9 @@ fun TeamMemberEntry(
     member: List<String>,
     userIsAdmin: Boolean,
     onIconClick: (ImageVector, Boolean, String, String, String, () -> Unit) -> Unit,
+    onChangeSuccess: (List<String>?) -> Unit
 ) {
+    var currentMember = member.toMutableList();
     Row(
         modifier = Modifier
 
@@ -205,17 +207,17 @@ fun TeamMemberEntry(
     ) {
         Row {
             Icon(
-                imageVector = if (member[0] == "Admin") Icons.Default.VerifiedUser else Icons.Default.Person,
+                imageVector = if (currentMember[0] == "Admin") Icons.Default.VerifiedUser else Icons.Default.Person,
                 contentDescription = "Icon of user",
                 modifier = Modifier.padding(end = 10.dp)
             )
-            Text(text = member[1])
+            Text(text = currentMember[1])
         }
         Row {
             if (userIsAdmin) {
-                if (member[2] != "pending") {
-                    if (member[2] != "You") {
-                        val memberIsAdmin = member[0] == "Admin"
+                if (currentMember[2] != "pending") {
+                    if (currentMember[2] != "You") {
+                        val memberIsAdmin = currentMember[0] == "Admin"
                         val adminIcon =
                             if (!memberIsAdmin) Icons.Default.VerifiedUser else Icons.Default.PersonOutline
                         val adminAction = "${if (memberIsAdmin) "Revoke" else "Grant"} rights"
@@ -225,14 +227,18 @@ fun TeamMemberEntry(
                                     adminIcon,
                                     false,
                                     if (memberIsAdmin) "Admin Removal" else "Admin Addition",
-                                    "You're about to ${if (memberIsAdmin) "revoke the admin rights of" else "grant admin rights to"} ${member[1]}.",
+                                    "You're about to ${if (memberIsAdmin) "revoke the admin rights of" else "grant admin rights to"} ${currentMember[1]}.",
                                     adminAction
                                 ) {
-                                    if (memberIsAdmin) {
+                                    if (!memberIsAdmin) {
                                         // TODO: API call to make user admin
+                                        currentMember[0] = "Admin"
                                     } else {
+
                                         // TODO: API call to remove users admin rights
+                                        currentMember[0] = "User"
                                     }
+                                    onChangeSuccess(currentMember)
                                 }
                             },
                         ) {
@@ -249,10 +255,11 @@ fun TeamMemberEntry(
                                     removeIcon,
                                     true,
                                     "Remove User from Team",
-                                    "You're about to remove ${member[1]} from the team.",
+                                    "You're about to remove ${currentMember[1]} from the team.",
                                     removeAction
                                 ) {
                                     // TODO: API call to remove user from team
+                                    onChangeSuccess(null)
                                 }
                             },
                             modifier = Modifier.padding(start = 10.dp)
@@ -272,10 +279,12 @@ fun TeamMemberEntry(
                                 acceptIcon,
                                 false,
                                 "Accept User to Team",
-                                "You're about to accept ${member[1]} to the team.",
+                                "You're about to accept ${currentMember[1]} to the team.",
                                 acceptAction
                             ) {
                                 // TODO: API call to accept user to team
+                                currentMember[2] = ""
+                                onChangeSuccess(currentMember)
                             }
                         },
                         modifier = Modifier.padding(end = 10.dp)
@@ -293,10 +302,11 @@ fun TeamMemberEntry(
                                 declineIcon,
                                 true,
                                 "Decline User from Team",
-                                "You're about to decline ${member[1]} from the team.",
+                                "You're about to decline ${currentMember[1]} from the team.",
                                 declineAction
                             ) {
                                 // TODO: API call to decline user from team
+                                onChangeSuccess(null)
                             }
                         },
                     ) {
