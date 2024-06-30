@@ -1,5 +1,6 @@
 package at.csdc25bb.mad.safmeetup.composables
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -62,13 +64,14 @@ fun AppButton(
 fun CustomIconButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
+    indication: Boolean = false,
     content: @Composable () -> Unit
 ) {
     Box(
         modifier = modifier
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = null,
+                indication = if(!indication) null else LocalIndication.current,
                 onClick = onClick
             ),
         contentAlignment = Alignment.Center,
@@ -129,4 +132,9 @@ fun InformationDialog(
             }
         }
     )
+}
+
+@Composable
+fun LightGrayDivider(modifier: Modifier = Modifier) {
+    Divider(color = MaterialTheme.colorScheme.outline, modifier = modifier)
 }

@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +30,7 @@ import at.csdc25bb.mad.safmeetup.composables.BottomSheet
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
 import at.csdc25bb.mad.safmeetup.composables.GermanDateTimeFormatter
 import at.csdc25bb.mad.safmeetup.composables.HorizontalDatePicker
+import at.csdc25bb.mad.safmeetup.composables.LightGrayDivider
 import at.csdc25bb.mad.safmeetup.composables.SearchBar
 import at.csdc25bb.mad.safmeetup.navigation.Screen
 import java.time.LocalDate
@@ -73,7 +72,7 @@ fun DashboardScreen(navController: NavHostController) {
                 )
             }
             var keywords by remember { mutableStateOf("") }
-            var subject by remember { mutableStateOf("Hike") }
+            var subject by remember { mutableStateOf("") }
             var location by remember { mutableStateOf("") }
             var type by remember { mutableStateOf("") }
             var pickedDate: LocalDate? by remember { mutableStateOf(null) }
@@ -103,22 +102,20 @@ fun DashboardScreen(navController: NavHostController) {
                     }
                 showBottomSheet = true
             }
-            Divider(
-                modifier = Modifier
+            LightGrayDivider(
+                Modifier
                     .width(LocalConfiguration.current.screenWidthDp.dp)
                     .padding(bottom = 5.dp)
-                    .padding(horizontal = 4.dp),
-                color = MaterialTheme.colorScheme.outline
+                    .padding(horizontal = 4.dp)
             )
 
             // BEGINNING of mocking data for testing
-            val dateTimeFormatter = GermanDateTimeFormatter
             val listOfActivities = mutableListOf<List<String>>()
             listOfActivities.add(
                 listOf(
                     "Weekly Training",
                     "Training",
-                    LocalDate.now().format(dateTimeFormatter),
+                    LocalDate.now().format(GermanDateTimeFormatter),
                     "FH Campus Gym"
                 )
             )
@@ -126,7 +123,7 @@ fun DashboardScreen(navController: NavHostController) {
                 listOf(
                     "Game against Eagles",
                     "Game",
-                    LocalDate.now().plusDays(3).format(dateTimeFormatter),
+                    LocalDate.now().plusDays(3).format(GermanDateTimeFormatter),
                     "FH Technikum Gym"
                 )
             )
@@ -134,7 +131,7 @@ fun DashboardScreen(navController: NavHostController) {
                 listOf(
                     "Hike",
                     "Other Activity",
-                    LocalDate.now().plusDays(5).format(dateTimeFormatter),
+                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
                     "Kahlenberg"
                 )
             )
@@ -142,7 +139,7 @@ fun DashboardScreen(navController: NavHostController) {
                 listOf(
                     "Going to a restaurant",
                     "Other Activity",
-                    LocalDate.now().plusDays(5).format(dateTimeFormatter),
+                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
                     "Das Zehn"
                 )
             )
@@ -166,7 +163,7 @@ fun DashboardScreen(navController: NavHostController) {
                         location.isEmpty() || activity[3].lowercase().contains(location.lowercase())
 
                     val matchesPickedDate = pickedDate?.let {
-                        activity[2] == it.format(dateTimeFormatter)
+                        activity[2] == it.format(GermanDateTimeFormatter)
                     } ?: true
 
                     val matchesType =
@@ -183,7 +180,7 @@ fun DashboardScreen(navController: NavHostController) {
                         date = activity[2],
                         location = activity[3]
                     ) {
-                        navController.navigate(Screen.Activity.route) // TODO: Somehow pass the activity or activities ID into activity screen here
+                        navController.navigate(Screen.Activity.withId("ActivityId")) // TODO: Pass the actual ID here
                     }
                 }
             }

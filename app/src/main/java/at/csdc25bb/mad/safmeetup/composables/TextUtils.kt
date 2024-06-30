@@ -140,11 +140,11 @@ fun TitleSubtitleText(title: String, subtitle: String) {
 }
 
 @Composable
-fun SmallTitle(title: String) {
+fun SmallTitle(title: String, modifier: Modifier = Modifier) {
     Text(
         text = title,
         style = TextStyle(fontSize = 20.sp),
-        modifier = Modifier.padding(bottom = 10.dp)
+        modifier = modifier.padding(bottom = 10.dp)
     )
 }
 

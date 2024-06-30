@@ -16,9 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -64,23 +64,20 @@ fun ActivityCard(
                 .padding(5.dp)
         ) {
             ActivityTitleText(title, type)
-            Divider(
-                modifier = Modifier
+            LightGrayDivider(
+                Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 5.dp),
-                color = MaterialTheme.colorScheme.outline
+                    .padding(vertical = 5.dp)
             )
             ActivityDetailLine(detail = "Date", date)
             ActivityDetailLine(detail = "Location", location)
 
-            Divider(
-                modifier = Modifier
+            LightGrayDivider(
+                Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 5.dp),
-                color = MaterialTheme.colorScheme.outline
+                    .padding(vertical = 5.dp)
             )
             Row(
-                modifier = Modifier
             ) {
                 ParticipationButton(true, participation) {
                     participation = true
@@ -163,22 +160,23 @@ fun ActivityCreationBottomSheet(onCreation: () -> Unit) {
 
     SmallTitle(title = "Create new Activity")
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Row(modifier = Modifier.fillMaxWidth(0.78f)) {
+        Row(modifier = Modifier.fillMaxWidth(0.85f)) {
             HorizontalDatePicker(selectedDate) { newSelectedDate ->
                 selectedDate = newSelectedDate
             }
         }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = {
-                    showExtendedDatePicker = true
-                })
+        CustomIconButton(
+            onClick = { showExtendedDatePicker = true },
+            modifier = Modifier.fillMaxWidth(),
+            indication = true
         ) {
-            Text(text = "Extended", style = TextStyle(fontSize = 14.sp))
-            Text(text = "Date", style = TextStyle(fontSize = 14.sp))
-            Text(text = "Picker", style = TextStyle(fontSize = 14.sp))
+            Icon(
+                imageVector = Icons.Default.CalendarMonth,
+                contentDescription = "Open extended date picker",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+            )
         }
     }
     BottomSheetMessage(
@@ -206,7 +204,8 @@ fun activityTypeSelector(
         "Training",
         "Game",
         "Other Activity"
-    )
+    ),
+    onChange: (String) -> Unit = {}
 ): String {
     var selected by remember { mutableStateOf(initialValue) }
     Row {
@@ -220,7 +219,10 @@ fun activityTypeSelector(
                     .padding(top = 10.dp)
                     .fillMaxWidth(if (iterator == 1) (0.33f) else if (iterator == 2) 0.5f else 1f),
                 color = (if (type == selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
-            ) { selected = if (selected != type) type else "" }
+            ) {
+                selected = if (selected != type) type else ""
+                onChange(selected)
+            }
         }
     }
     return selected
@@ -271,7 +273,7 @@ fun AdvancedFilterBottomSheet(
     AdvancedFilterOption(title = "Activity Type Selector", true) {
         type = activityTypeSelector(type)
     }
-    FilterDivider()
+    LightGrayDivider()
     AppButton(
         text = "Apply Filter",
         onClick = { onApplyFilter(subject, location, selectedDate, type) })
@@ -280,7 +282,7 @@ fun AdvancedFilterBottomSheet(
 @Composable
 fun AdvancedFilterOption(title: String, column: Boolean = false, content: @Composable () -> Unit) {
     Column {
-        FilterDivider()
+        LightGrayDivider()
         if (!column)
             Row(
                 modifier = Modifier
@@ -302,11 +304,6 @@ fun AdvancedFilterOption(title: String, column: Boolean = false, content: @Compo
 @Composable
 fun FilterOptionText(text: String) {
     Text(text = text, style = TextStyle(fontSize = 18.sp), modifier = Modifier.padding(end = 10.dp))
-}
-
-@Composable
-fun FilterDivider() {
-    Divider(color = MaterialTheme.colorScheme.outline)
 }
 
 val GermanDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern(
