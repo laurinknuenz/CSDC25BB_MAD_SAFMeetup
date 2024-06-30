@@ -47,6 +47,7 @@ import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
 import at.csdc25bb.mad.safmeetup.composables.InfoDialogParams
 import at.csdc25bb.mad.safmeetup.composables.InformationDialog
 import at.csdc25bb.mad.safmeetup.composables.ProfilePageTopBar
+import at.csdc25bb.mad.safmeetup.composables.SmallTitle
 import at.csdc25bb.mad.safmeetup.composables.TeamCreationBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.TeamJoiningBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.TeamMemberEntry
@@ -84,17 +85,25 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
     Scaffold(
         topBar = {
             ProfilePageTopBar(userProfileSelected, { value -> userProfileSelected = value }) {
-                bottomSheetContent = { TeamSwitchBottomSheet(onChoosing = {newTeam ->
-                    chosenTeam = newTeam
-                    showBottomSheet = false
-                    navController.navigate(Screen.Profile.route)
-                }) }
+                bottomSheetContent = {
+                    TeamSwitchBottomSheet(onChoosing = { newTeam ->
+                        chosenTeam = newTeam
+                        showBottomSheet = false
+                        navController.navigate(Screen.Profile.route)
+                    })
+                }
                 showBottomSheet = true
             }
         },
         bottomBar = {
             DashboardProfileBottomBar(navController, false) {
-                bottomSheetContent = { ActivityCreationBottomSheet() }
+                bottomSheetContent =
+                    {
+                        ActivityCreationBottomSheet {
+                            navController.navigate(Screen.Dashboard.route)
+                            showBottomSheet = false
+                        }
+                    }
                 showBottomSheet = true
             }
         }
@@ -179,10 +188,12 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                                     text = "Create new Team",
                                     modifier = Modifier.fillMaxWidth(0.96f)
                                 ) {
-                                    bottomSheetContent = { TeamCreationBottomSheet{
-                                        showBottomSheet = false
-                                        navController.navigate(Screen.Dashboard.route)
-                                    } }
+                                    bottomSheetContent = {
+                                        TeamCreationBottomSheet {
+                                            showBottomSheet = false
+                                            navController.navigate(Screen.Dashboard.route)
+                                        }
+                                    }
                                     showBottomSheet = true
                                 }
                             }
@@ -310,11 +321,7 @@ fun TeamProfile(
             profileDetailLine(name = "Contact", value = managerContact, editable = false)
             profileDetailLine(name = "inviteCode", value = inviteCode, editable = false)
         }
-        Text(
-            text = "Team Members",
-            style = TextStyle(fontSize = 20.sp),
-            modifier = Modifier.padding(vertical = 10.dp)
-        )
+        SmallTitle(title = "Team Members")
         Column(
             modifier = Modifier
                 .fillMaxSize()

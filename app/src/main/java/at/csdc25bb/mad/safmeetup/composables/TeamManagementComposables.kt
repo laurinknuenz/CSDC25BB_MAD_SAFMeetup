@@ -24,9 +24,12 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun TeamCreationBottomSheet(onSuccess: () -> Unit) {
     var message by remember { mutableStateOf("") }
+    var name = ""
+    var typeOfSports = ""
 
-    val name = bottomSheetTextField("Team Name")
-    val typeOfSports = bottomSheetTextField("Type of Sports")
+    SmallTitle(title = "Create new Team")
+    BottomSheetTextField("Team Name") { newName -> name = newName }
+    BottomSheetTextField("Type of Sports") { newType -> typeOfSports = newType }
 
     BottomSheetMessage(message = message)
     AppButton(text = "Create new Team") {
@@ -38,10 +41,12 @@ fun TeamCreationBottomSheet(onSuccess: () -> Unit) {
 
 @Composable
 fun TeamJoiningBottomSheet() {
+    SmallTitle(title = "Join new Team")
     Column(verticalArrangement = Arrangement.Center) {
         var message by remember { mutableStateOf("") }
+        var inviteCode = ""
 
-        val inviteCode = bottomSheetTextField("Invite Code")
+        BottomSheetTextField("Invite Code") { newInviteCode -> inviteCode = newInviteCode }
         BottomSheetMessage(message = message)
         AppButton(text = "Join Team") {
             // TODO: Make api call here to request team joining
@@ -59,6 +64,7 @@ fun TeamSwitchBottomSheet(
     ),
     onChoosing: (String) -> Unit
 ) {
+    SmallTitle(title = "Switch Teams")
     teams.forEach { team ->
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(

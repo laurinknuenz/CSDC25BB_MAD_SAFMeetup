@@ -30,12 +30,11 @@ import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.AdvancedFilterBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.BottomSheet
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
-import at.csdc25bb.mad.safmeetup.composables.datePicker
-import at.csdc25bb.mad.safmeetup.composables.searchBar
+import at.csdc25bb.mad.safmeetup.composables.GermanDateTimeFormatter
+import at.csdc25bb.mad.safmeetup.composables.HorizontalDatePicker
+import at.csdc25bb.mad.safmeetup.composables.SearchBar
 import at.csdc25bb.mad.safmeetup.navigation.Screen
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun DashboardScreen(navController: NavHostController) {
@@ -47,7 +46,12 @@ fun DashboardScreen(navController: NavHostController) {
     Scaffold(
         bottomBar = {
             DashboardProfileBottomBar(navController, true) {
-                bottomSheetContent = { ActivityCreationBottomSheet() }
+                bottomSheetContent = {
+                    ActivityCreationBottomSheet {
+                        showBottomSheet = false
+                        navController.navigate(Screen.Dashboard.route)
+                    }
+                }
                 showBottomSheet = true
             }
         },
@@ -68,12 +72,37 @@ fun DashboardScreen(navController: NavHostController) {
                     style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 )
             }
-            val pickedDate: LocalDate? = datePicker()
-            val searchText: String =
-                searchBar(modifier = Modifier.padding(horizontal = dashboardPadding)) {
-                    bottomSheetContent = { AdvancedFilterBottomSheet() }
-                    showBottomSheet = true
-                }
+            var keywords by remember { mutableStateOf("") }
+            var subject by remember { mutableStateOf("Hike") }
+            var location by remember { mutableStateOf("") }
+            var type by remember { mutableStateOf("") }
+            var pickedDate: LocalDate? by remember { mutableStateOf(null) }
+
+            HorizontalDatePicker(pickedDate) { newDate -> pickedDate = newDate }
+            SearchBar(
+                modifier = Modifier.padding(horizontal = dashboardPadding),
+                onChange = { newKeywords ->
+                    keywords = newKeywords
+                }, onClickResetFilter = {
+                    keywords = ""
+                    subject = ""
+                    location = ""
+                    pickedDate = null
+                    type = ""
+                }) {
+                bottomSheetContent =
+                    {
+                        AdvancedFilterBottomSheet(subject, location, pickedDate, type,
+                            onApplyFilter = { newSubject, newLocation, newDate, newType ->
+                                subject = newSubject
+                                location = newLocation
+                                pickedDate = newDate
+                                type = newType
+                                showBottomSheet = false
+                            })
+                    }
+                showBottomSheet = true
+            }
             Divider(
                 modifier = Modifier
                     .width(LocalConfiguration.current.screenWidthDp.dp)
@@ -83,7 +112,7 @@ fun DashboardScreen(navController: NavHostController) {
             )
 
             // BEGINNING of mocking data for testing
-            val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN)
+            val dateTimeFormatter = GermanDateTimeFormatter
             val listOfActivities = mutableListOf<List<String>>()
             listOfActivities.add(
                 listOf(
@@ -125,16 +154,25 @@ fun DashboardScreen(navController: NavHostController) {
                     .padding(horizontal = dashboardPadding)
             ) {
                 val filteredActivities = listOfActivities.filter { activity ->
-                    val matchesSearchText = searchText.isEmpty() ||
-                            activity[0].lowercase().contains(searchText.lowercase()) ||
-                            activity[1].lowercase().contains(searchText.lowercase()) ||
-                            activity[3].lowercase().contains(searchText.lowercase())
+                    val matchesSearchText = keywords.isEmpty() ||
+                            activity[0].lowercase().contains(keywords.lowercase()) ||
+                            activity[1].lowercase().contains(keywords.lowercase()) ||
+                            activity[3].lowercase().contains(keywords.lowercase())
+
+                    val matchesSubject =
+                        subject.isEmpty() || activity[0].lowercase().contains(subject.lowercase())
+
+                    val matchesLocation =
+                        location.isEmpty() || activity[3].lowercase().contains(location.lowercase())
 
                     val matchesPickedDate = pickedDate?.let {
                         activity[2] == it.format(dateTimeFormatter)
                     } ?: true
 
-                    matchesSearchText && matchesPickedDate
+                    val matchesType =
+                        type.isEmpty() || activity[1].lowercase().contains(type.lowercase())
+
+                    matchesSearchText && matchesSubject && matchesLocation && matchesPickedDate && matchesType
                 }
                 items(filteredActivities.size) {
                     val activity =

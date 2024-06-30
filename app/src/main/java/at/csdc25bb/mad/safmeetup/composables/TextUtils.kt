@@ -1,7 +1,9 @@
 package at.csdc25bb.mad.safmeetup.composables
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,6 +29,7 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -55,12 +58,20 @@ fun TextWithGoogleFont(text: String, font: String, size: TextUnit) {
 }
 
 @Composable
-fun searchBar(modifier: Modifier, onClickAdvancedFilter: () -> Unit): String {
+fun SearchBar(
+    modifier: Modifier,
+    onChange: (String) -> Unit,
+    onClickResetFilter: () -> Unit,
+    onClickAdvancedFilter: () -> Unit
+) {
     var searchText by remember { mutableStateOf("") }
 
     OutlinedTextField(
         value = searchText,
-        onValueChange = { searchText = it },
+        onValueChange = {
+            searchText = it
+            onChange(searchText)
+        },
         label = { Text("Enter keywords...") },
         singleLine = true,
         trailingIcon = {
@@ -80,9 +91,24 @@ fun searchBar(modifier: Modifier, onClickAdvancedFilter: () -> Unit): String {
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 20.dp)
     )
-    return searchText
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 7.dp)
+            .padding(bottom = 15.dp)
+            .padding(end = 7.dp),
+        horizontalArrangement = Arrangement.End
+    ) {
+        Text(
+            text = "Reset filter",
+            style = TextStyle(fontSize = 14.sp, textDecoration = TextDecoration.Underline),
+            modifier = Modifier.clickable(onClick = {
+                searchText = ""
+                onClickResetFilter()
+            }),
+        )
+    }
 }
 
 @Composable
@@ -110,6 +136,15 @@ fun TitleSubtitleText(title: String, subtitle: String) {
             withStyle(style = SpanStyle(fontSize = 16.sp)) { append(subtitle) }
         },
         modifier = Modifier.padding(bottom = 20.dp)
+    )
+}
+
+@Composable
+fun SmallTitle(title: String) {
+    Text(
+        text = title,
+        style = TextStyle(fontSize = 20.sp),
+        modifier = Modifier.padding(bottom = 10.dp)
     )
 }
 

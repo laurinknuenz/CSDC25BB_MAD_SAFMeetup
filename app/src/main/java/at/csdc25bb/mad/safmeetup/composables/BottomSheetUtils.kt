@@ -2,7 +2,9 @@
 
 package at.csdc25bb.mad.safmeetup.composables
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,26 +58,45 @@ fun BottomSheet(showBottomSheet: Boolean, onHide: () -> Unit, content: @Composab
 }
 
 @Composable
-fun bottomSheetTextField(label: String): String {
-    var value by remember { mutableStateOf("") }
-    OutlinedTextField(
-        label = { Text(text = label) },
-        value = value,
-        onValueChange = { newValue -> value = newValue },
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth()
-    )
-    return value
+fun BottomSheetTextField(
+    label: String,
+    initValue: String = "",
+    onChange: (String) -> Unit
+) {
+    var value by remember { mutableStateOf(initValue) }
+    if (label.isNotEmpty()) {
+        OutlinedTextField(
+            label = { if (label.isNotEmpty()) Text(text = label) },
+            value = value,
+            onValueChange = { newValue ->
+                value = newValue
+                onChange(newValue)
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+    } else
+        OutlinedTextField(
+            value = value,
+            onValueChange = { newValue ->
+                value = newValue
+                onChange(newValue)
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
 }
 
 @Composable
-fun BottomSheetMessage(message: String){
-    Text(
-        text = message,
-        style = TextStyle(fontSize = 14.sp),
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .padding(vertical = 10.dp)
-            .fillMaxWidth()
-    )
+fun BottomSheetMessage(message: String, padding: PaddingValues = PaddingValues(vertical = 10.dp)) {
+    AnimatedVisibility(message != "") {
+        Text(
+            text = message,
+            style = TextStyle(fontSize = 14.sp),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxWidth()
+        )
+    }
 }
