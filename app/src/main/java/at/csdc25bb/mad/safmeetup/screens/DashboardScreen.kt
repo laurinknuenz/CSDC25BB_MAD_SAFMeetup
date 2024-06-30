@@ -22,6 +22,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import at.csdc25bb.mad.safmeetup.composables.ActivityCard
 import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
@@ -36,7 +37,10 @@ import at.csdc25bb.mad.safmeetup.navigation.Screen
 import java.time.LocalDate
 
 @Composable
-fun DashboardScreen(navController: NavHostController) {
+fun DashboardScreen(
+    navController: NavHostController,
+    teamViewModel: TeamViewModel = hiltViewModel(),
+) {
     val dashboardPadding = 15.dp
     var showBottomSheet by remember { mutableStateOf(false) }
     var bottomSheetContent by remember { mutableStateOf<@Composable () -> Unit>({}) }
