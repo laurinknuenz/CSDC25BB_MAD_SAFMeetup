@@ -1,6 +1,6 @@
 package at.csdc25bb.mad.safmeetup.data.datasource
 
-import at.csdc25bb.mad.safmeetup.data.api.ApiResponse
+import at.csdc25bb.mad.safmeetup.data.api.response.ApiResponse
 import at.csdc25bb.mad.safmeetup.data.entity.Team
 import retrofit2.Response
 

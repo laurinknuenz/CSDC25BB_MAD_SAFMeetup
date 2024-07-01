@@ -1,10 +1,13 @@
 package at.csdc25bb.mad.safmeetup.data.repository
 
+import android.content.Context
 import android.util.Log
+import at.csdc25bb.mad.safmeetup.SFMApplication
 import at.csdc25bb.mad.safmeetup.data.api.ApiService
-import at.csdc25bb.mad.safmeetup.data.api.LoginRequest
-import at.csdc25bb.mad.safmeetup.data.api.LogoutResponse
-import at.csdc25bb.mad.safmeetup.data.api.RegisterRequest
+import at.csdc25bb.mad.safmeetup.data.api.request.LoginRequest
+import at.csdc25bb.mad.safmeetup.data.api.response.LogoutResponse
+import at.csdc25bb.mad.safmeetup.data.api.request.RegisterRequest
+import at.csdc25bb.mad.safmeetup.data.datasource.UserDataSource
 import at.csdc25bb.mad.safmeetup.data.entity.User
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import kotlinx.coroutines.flow.Flow
@@ -14,18 +17,25 @@ import javax.inject.Inject
 
 class UserRepository @Inject constructor(
     private val apiService: ApiService,
+    private val userDataSource: UserDataSource
 ) {
+
+    val sharedPref = SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
 
     suspend fun login(username: String, password: String): Flow<ResourceState<User>> {
         return flow {
             emit(ResourceState.Loading())
             val response = apiService.login(LoginRequest(username, password))
-            Log.d("LOGIN", response.body().toString())
+            Log.d(TAG, response.body().toString())
 
             if (response.isSuccessful && response.body() != null) {
                 emit(ResourceState.Success(response.body()!!))
+                with(sharedPref.edit()) {
+                    putString("username", response.body()!!.username)
+                    apply()
+                }
             } else {
-                Log.d("LOGIN", response.body().toString())
+                Log.d(TAG, response.body().toString())
                 emit(ResourceState.Error("Invalid username or password"))
             }
         }.catch { e ->
@@ -37,17 +47,19 @@ class UserRepository @Inject constructor(
         return flow {
             emit(ResourceState.Loading())
 
-            Log.d("UserRepository", "Logout button clicked")
             val response = apiService.logout()
-            Log.d("UserRepository", response.toString())
 
             if (response.isSuccessful && response.body() != null) {
                 emit(ResourceState.Success(response.body()!!))
+                with(sharedPref.edit()) {
+                    remove("username")
+                    apply()
+                }
             } else {
                 emit(ResourceState.Error("Error during logout process"))
             }
         }.catch { e ->
-            Log.d("UserRepository", e.localizedMessage)
+            Log.d(TAG, e.localizedMessage)
             emit(ResourceState.Error(e.localizedMessage ?: "Error logging out"))
         }
     }
@@ -74,7 +86,7 @@ class UserRepository @Inject constructor(
                         inviteCode
                     )
                 )
-            Log.d("REGISTER", response.body().toString())
+            Log.d(TAG, response.body().toString())
 
             if (response.isSuccessful && response.body() != null) {
                 emit(ResourceState.Success(response.body()!!.data))
@@ -84,5 +96,28 @@ class UserRepository @Inject constructor(
         }.catch { e ->
             emit(ResourceState.Error(e.localizedMessage ?: "Error during registration"))
         }
+    }
+
+    suspend fun getUser(): Flow<ResourceState<User>> {
+        return flow {
+            emit(ResourceState.Loading())
+            val username = sharedPref.getString("username", "")
+            val response = userDataSource.getUser(username!!)
+            Log.d(TAG, response.body().toString())
+
+            if (response.isSuccessful && response.body() != null) {
+                val userData = response.body()!!.data
+                emit(ResourceState.Success(userData))
+            }
+            else {
+                emit(ResourceState.Error("Invalid username or password"))
+            }
+        }.catch { e ->
+            emit(ResourceState.Error(e.localizedMessage ?: "Error logging in"))
+        }
+    }
+
+    companion object {
+        const val TAG = "ActivityRepository"
     }
 }

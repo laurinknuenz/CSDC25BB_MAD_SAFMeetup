@@ -1,4 +1,4 @@
-package at.csdc25bb.mad.safmeetup.data.api
+package at.csdc25bb.mad.safmeetup.data.api.request
 
 data class RegisterRequest(
     val firstname: String,

@@ -3,7 +3,7 @@ package at.csdc25bb.mad.safmeetup.ui.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import at.csdc25bb.mad.safmeetup.data.api.LogoutResponse
+import at.csdc25bb.mad.safmeetup.data.api.response.LogoutResponse
 import at.csdc25bb.mad.safmeetup.data.entity.User
 import at.csdc25bb.mad.safmeetup.data.repository.UserRepository
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState

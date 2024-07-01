@@ -1,5 +1,6 @@
 package at.csdc25bb.mad.safmeetup.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import at.csdc25bb.mad.safmeetup.R
 import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
@@ -47,6 +49,7 @@ import at.csdc25bb.mad.safmeetup.composables.BottomSheet
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
 import at.csdc25bb.mad.safmeetup.composables.InfoDialogParams
 import at.csdc25bb.mad.safmeetup.composables.InformationDialog
+import at.csdc25bb.mad.safmeetup.composables.Loader
 import at.csdc25bb.mad.safmeetup.composables.ProfilePageTopBar
 import at.csdc25bb.mad.safmeetup.composables.SmallTitle
 import at.csdc25bb.mad.safmeetup.composables.TeamCreationBottomSheet
@@ -55,11 +58,20 @@ import at.csdc25bb.mad.safmeetup.composables.TeamMemberEntry
 import at.csdc25bb.mad.safmeetup.composables.TeamSwitchBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.Title
 import at.csdc25bb.mad.safmeetup.composables.profileDetailLine
+import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import at.csdc25bb.mad.safmeetup.navigation.Screen
 import at.csdc25bb.mad.safmeetup.ui.viewmodel.AuthViewModel
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.UserViewModel
 
 @Composable
-fun ProfileScreen(navController: NavController, authViewModel: AuthViewModel, manager: Boolean = true) {
+fun ProfileScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    manager: Boolean = true,
+    userViewModel: UserViewModel = hiltViewModel(),
+) {
+    val currentUser by userViewModel.user.collectAsState()
+
     var errorMessage by remember { mutableStateOf("") }
     val logoutState by authViewModel.logoutState.collectAsState()
 
@@ -127,22 +139,45 @@ fun ProfileScreen(navController: NavController, authViewModel: AuthViewModel, ma
                         .padding(bottom = 15.dp)
                         .fillMaxWidth()
                 ) {
-                    if (userProfileSelected) UserProfile()
-                    else if (userIsPartOfTeam) TeamProfile(
-                        userIsAdmin = true, // TODO: Change this to check user role
-                        onIconClick = { icon: ImageVector, warning: Boolean, title: String,
-                                        dialogText: String, confirmButtonText: String, onClick: () -> Unit ->
-                            infoDialogParams = InfoDialogParams(
-                                icon = icon,
-                                warning = warning,
-                                title = title,
-                                dialogText = dialogText,
-                                confirmButtonText = confirmButtonText
-                            ) { onClick() }
-                            openInformationDialog = true
+                    when (currentUser) {
+                        is ResourceState.Loading ->
+                        {
+                            Log.d("PROFILE-SCREEN", "Still loading")
+                            Loader()
                         }
-                    )
-                    else NoTeamScreen()
+                        is ResourceState.Success -> {
+                            val userResponse = (currentUser as ResourceState.Success).data
+                            if (userProfileSelected) UserProfile(
+                                username = userResponse.username,
+                                firstName = userResponse.firstname,
+                                lastName = userResponse.lastname,
+                                email = userResponse.email
+                            )
+                            else if (userIsPartOfTeam) TeamProfile(
+                                userIsAdmin = true, // TODO: Change this to check user role
+                                onIconClick = {
+                                        icon: ImageVector, warning: Boolean, title: String,
+                                        dialogText: String, confirmButtonText: String, onClick: () -> Unit,
+                                    ->
+                                    infoDialogParams = InfoDialogParams(
+                                        icon = icon,
+                                        warning = warning,
+                                        title = title,
+                                        dialogText = dialogText,
+                                        confirmButtonText = confirmButtonText
+                                    ) { onClick() }
+                                    openInformationDialog = true
+                                }
+                            )
+                            else NoTeamScreen()
+                        }
+                        is ResourceState.Error -> {
+                            Log.d("PROFILE-SCREEN", "Error loading user")
+                        }
+                        is ResourceState.Idle -> {
+                            //DO NOTHING
+                        }
+                    }
                 }
             }
             item {
@@ -243,10 +278,10 @@ fun ProfileScreen(navController: NavController, authViewModel: AuthViewModel, ma
 @Composable
 fun UserProfile(
     profilePicture: Painter = painterResource(id = R.drawable.logo_app), // TODO: Change this to pass only a mapped user object
-    userName: String = "laurinknunz",
+    username: String = "laurinknunz",
     firstName: String = "Laurin",
     lastName: String = "Knünz",
-    email: String = "laurin.knunz@gmail.com"
+    email: String = "laurin.knunz@gmail.com",
 ) {
     var currentFirstName by remember { mutableStateOf(firstName) }
     var currentLastName by remember { mutableStateOf(lastName) }
@@ -269,7 +304,7 @@ fun UserProfile(
 
         }
         Column {
-            profileDetailLine(name = "Username", value = userName)
+            profileDetailLine(name = "Username", value = username)
             profileDetailLine(name = "Password", value = "●●●●●●●●", password = true)
             currentFirstName = profileDetailLine(name = "First name", value = firstName)
             currentLastName = profileDetailLine(name = "Last name", value = lastName)
@@ -299,7 +334,7 @@ fun TeamProfile(
         mutableListOf("User", "Mathias Kerndl", "pending"),
         mutableListOf("User", "Rene Goldschmid", "pending"),
         mutableListOf("User", "Judy Kardouh", "pending"),
-    )// TODO: Replace with list of users
+    ),// TODO: Replace with list of users
 ) {
     var currentTeamName by remember { mutableStateOf(teamName) }
     var membersList by remember { mutableStateOf(members) }

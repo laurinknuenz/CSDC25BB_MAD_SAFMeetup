@@ -23,16 +23,27 @@ fun Navigation() {
         startDestination = Screen.Login.route
     ) {
         composable(route = Screen.Dashboard.route) {
-            DashboardScreen(navController = navController)
+            DashboardScreen(
+                navController = navController
+            )
         }
         composable(route = Screen.Login.route) {
-            LoginScreen(navController = navController, authViewModel = authViewModel)
+            LoginScreen(
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
         composable(route = Screen.Register.route) {
-            RegisterScreen(navController = navController, authViewModel = authViewModel)
+            RegisterScreen(
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
         composable(route = Screen.Profile.route) {
-            ProfileScreen(navController = navController, authViewModel = authViewModel)
+            ProfileScreen(
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
         composable(
             route = Screen.Activity.route,
