@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import at.csdc25bb.mad.safmeetup.R
 import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.AppButton
@@ -55,9 +56,13 @@ import at.csdc25bb.mad.safmeetup.composables.TeamSwitchBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.Title
 import at.csdc25bb.mad.safmeetup.composables.profileDetailLine
 import at.csdc25bb.mad.safmeetup.navigation.Screen
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.AuthViewModel
 
 @Composable
-fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
+fun ProfileScreen(navController: NavController, authViewModel: AuthViewModel, manager: Boolean = true) {
+    var errorMessage by remember { mutableStateOf("") }
+    val logoutState by authViewModel.logoutState.collectAsState()
+
     var userProfileSelected by remember { mutableStateOf(true) }
     var chosenTeam by remember { mutableStateOf("Laurins Team") }
     val userIsPartOfTeam = true
@@ -151,8 +156,9 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                                 title = "Signing out",
                                 dialogText = "You're about to sign out.",
                                 confirmButtonText = "Sign out"
-                            ) {
-                                // TODO: Make the API call to logout here
+                            )
+                            {
+                                authViewModel.logout()
                                 navController.navigate(Screen.Login.route)
                             }
                             openInformationDialog = true

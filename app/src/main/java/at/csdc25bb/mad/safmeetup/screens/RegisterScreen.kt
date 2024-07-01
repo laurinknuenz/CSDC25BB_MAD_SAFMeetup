@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,13 +27,26 @@ import at.csdc25bb.mad.safmeetup.composables.AppButton
 import at.csdc25bb.mad.safmeetup.composables.BottomViewSwitcher
 import at.csdc25bb.mad.safmeetup.composables.ErrorMessageText
 import at.csdc25bb.mad.safmeetup.composables.FullSizeCenteredColumn
+import at.csdc25bb.mad.safmeetup.composables.Loader
 import at.csdc25bb.mad.safmeetup.composables.RegisterLoginHeader
 import at.csdc25bb.mad.safmeetup.composables.TitleSubtitleText
 import at.csdc25bb.mad.safmeetup.composables.loginRegisterTextField
 import at.csdc25bb.mad.safmeetup.composables.minimalCheckbox
+import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
+import at.csdc25bb.mad.safmeetup.navigation.Screen
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.AuthViewModel
 
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(navController: NavController, authViewModel: AuthViewModel) {
+    var firstname by remember { mutableStateOf("") }
+    var lastname by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var inviteCode by remember { mutableStateOf("") }
+    var checked by remember { mutableStateOf(false) }
+    val registerState by authViewModel.registerState.collectAsState()
+
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top
@@ -43,14 +57,6 @@ fun RegisterScreen(navController: NavController) {
                 .padding(vertical = 40.dp),
             verticalArrangement = Arrangement.SpaceAround
         ) {
-            var username = ""
-            var password = ""
-            var firstName = ""
-            var lastName = ""
-            var email = ""
-            var teamCode = ""
-            var checked by remember { mutableStateOf(false) }
-
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.width(IntrinsicSize.Min)
@@ -69,12 +75,12 @@ fun RegisterScreen(navController: NavController) {
                         password = true
                     )
                     Divider(modifier = Modifier.padding(top = 8.dp))
-                    firstName = loginRegisterTextField("First Name", focusRequester)
-                    lastName = loginRegisterTextField("Last Name", focusRequester)
+                    firstname = loginRegisterTextField("First Name", focusRequester)
+                    lastname = loginRegisterTextField("Last Name", focusRequester)
                     email = loginRegisterTextField("E-Mail Address", focusRequester, true)
                     Divider(modifier = Modifier.padding(top = 8.dp))
                     AnimatedVisibility(visible = checked) {
-                        teamCode = loginRegisterTextField("Team Code", focusRequester)
+                        inviteCode = loginRegisterTextField("Team Code", focusRequester)
                     }
                     Row(
                         modifier = Modifier
@@ -90,7 +96,14 @@ fun RegisterScreen(navController: NavController) {
                 AppButton(
                     text = "Click to Register",
                     onClick = {
-                        errorMessage = "Username is already used."
+                        authViewModel.register(
+                            firstname,
+                            lastname,
+                            username,
+                            email,
+                            password,
+                            inviteCode
+                        )
                     }, //TODO: Make registration work with API
                 )
                 ErrorMessageText(
@@ -103,6 +116,24 @@ fun RegisterScreen(navController: NavController) {
                 highlightedText = "Login"
             ) {
                 navController.navigate("login")
+            }
+            when (registerState) {
+                is ResourceState.Loading -> Loader()
+                is ResourceState.Success -> {
+                    // Navigate to another screen or show success message
+                    Text(text = "Registration Successful!")
+                    authViewModel.clearRegisterState()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+                is ResourceState.Error -> {
+                    val error = (registerState as ResourceState.Error).error
+                    Text(text = "Error: $error")
+                }
+                is ResourceState.Idle -> {
+                    // Do nothing
+                }
             }
         }
     }

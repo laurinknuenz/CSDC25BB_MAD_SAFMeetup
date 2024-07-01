@@ -1,5 +1,6 @@
 package at.csdc25bb.mad.safmeetup.data.repository
 
+import android.util.Log
 import at.csdc25bb.mad.safmeetup.data.datasource.TeamDataSource
 import at.csdc25bb.mad.safmeetup.data.entity.Team
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
@@ -18,9 +19,11 @@ class TeamRepository @Inject constructor(
             emit(ResourceState.Loading())
 
             val response = teamDataSource.getTeam(team)
+            Log.d("GET-TEAM", response.body().toString())
 
             if (response.isSuccessful && response.body() != null) {
-                emit(ResourceState.Success(response.body()!!))
+                val teamData = response.body()!!.data
+                emit(ResourceState.Success(teamData))
             } else {
                 emit(ResourceState.Error("Error fetching Team data"))
             }
@@ -40,7 +43,8 @@ class TeamRepository @Inject constructor(
             val response = teamDataSource.getAllTeams()
 
             if (response.isSuccessful && response.body() != null) {
-                emit(ResourceState.Success(response.body()!!))
+                val teamsData = response.body()!!.data
+                emit(ResourceState.Success(teamsData))
             } else {
                 emit(ResourceState.Error("Error fetching Team data"))
             }

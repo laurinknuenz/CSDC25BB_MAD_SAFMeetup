@@ -1,5 +1,6 @@
 package at.csdc25bb.mad.safmeetup.ui.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.csdc25bb.mad.safmeetup.data.entity.Team
@@ -37,6 +38,7 @@ class TeamViewModel @Inject constructor(
     fun getTeam(team: String) {
         viewModelScope.launch(Dispatchers.IO) {
             teamRepository.getTeam(team).collectLatest { teamResponse ->
+                Log.d(TAG, teamResponse.toString())
                 _team.value = teamResponse
             }
         }

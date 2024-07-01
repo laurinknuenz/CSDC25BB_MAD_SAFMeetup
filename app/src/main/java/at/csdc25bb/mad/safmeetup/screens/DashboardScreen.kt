@@ -34,6 +34,7 @@ import at.csdc25bb.mad.safmeetup.composables.HorizontalDatePicker
 import at.csdc25bb.mad.safmeetup.composables.LightGrayDivider
 import at.csdc25bb.mad.safmeetup.composables.SearchBar
 import at.csdc25bb.mad.safmeetup.navigation.Screen
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
 import java.time.LocalDate
 
 @Composable
@@ -106,6 +107,27 @@ fun DashboardScreen(
                     }
                 showBottomSheet = true
             }
+//            teamViewModel.getTeam("laurins Team")
+//            val team by teamViewModel.team.collectAsState()
+//            when(team) {
+//                is ResourceState.Loading -> {
+//                    Log.d("DASHBOARD-SCREEN", "Still loading")
+//                }
+//
+//                is ResourceState.Success -> {
+//                    val response = (team as ResourceState.Success).data
+//                    Log.d("DASHBOARD-SCREEN", "TEAM: ${response}")
+//                    Text(text = response.name)
+//                }
+//                is ResourceState.Error -> {
+//                    Log.d("DASHBOARD-SCREEN", "Error loading team")
+//                }
+//
+//                is ResourceState.Idle -> {
+//                    //DO NOTHING
+//                }
+//            }
+
             LightGrayDivider(
                 Modifier
                     .width(LocalConfiguration.current.screenWidthDp.dp)

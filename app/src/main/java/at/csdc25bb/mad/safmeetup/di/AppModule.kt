@@ -5,6 +5,9 @@ import at.csdc25bb.mad.safmeetup.data.api.ApiService
 import at.csdc25bb.mad.safmeetup.data.datasource.TeamDataSource
 import at.csdc25bb.mad.safmeetup.data.datasource.TeamDataSourceImpl
 import at.csdc25bb.mad.safmeetup.data.repository.TeamRepository
+import at.csdc25bb.mad.safmeetup.data.repository.UserRepository
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.AuthViewModel
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -61,5 +64,23 @@ class AppModule {
     @Singleton
     fun providesTeamRepository(teamDataSource: TeamDataSource): TeamRepository {
         return TeamRepository(teamDataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun providesTeamViewModel(teamRepository: TeamRepository): TeamViewModel{
+        return TeamViewModel(teamRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun providesUserRepository(apiService: ApiService): UserRepository {
+        return UserRepository(apiService)
+    }
+
+    @Provides
+    @Singleton
+    fun providesLoginViewModel(userRepository: UserRepository): AuthViewModel {
+        return AuthViewModel(userRepository)
     }
 }

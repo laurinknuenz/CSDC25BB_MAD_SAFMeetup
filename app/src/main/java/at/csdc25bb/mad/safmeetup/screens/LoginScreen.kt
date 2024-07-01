@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,18 +19,24 @@ import at.csdc25bb.mad.safmeetup.composables.AppButton
 import at.csdc25bb.mad.safmeetup.composables.BottomViewSwitcher
 import at.csdc25bb.mad.safmeetup.composables.ErrorMessageText
 import at.csdc25bb.mad.safmeetup.composables.FullSizeCenteredColumn
+import at.csdc25bb.mad.safmeetup.composables.Loader
 import at.csdc25bb.mad.safmeetup.composables.RegisterLoginHeader
 import at.csdc25bb.mad.safmeetup.composables.TitleSubtitleText
 import at.csdc25bb.mad.safmeetup.composables.loginRegisterTextField
+import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import at.csdc25bb.mad.safmeetup.navigation.Screen
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.AuthViewModel
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+    val loginState by authViewModel.loginState.collectAsState()
+
     Column(verticalArrangement = Arrangement.Top) {
         RegisterLoginHeader()
         FullSizeCenteredColumn(verticalArrangement = Arrangement.SpaceAround) {
-            var username = ""
-            var password = ""
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -48,12 +55,10 @@ fun LoginScreen(navController: NavController) {
                         password = true
                     )
                 }
-                var errorMessage by remember { mutableStateOf("") }
                 AppButton(
                     text = "Click to Login",
                     onClick = {
-                        navController.navigate(Screen.Dashboard.route)
-                        //TODO: Make login work with API
+                        authViewModel.login(username, password)
                     },
                 )
                 ErrorMessageText(errorMessage)
@@ -64,6 +69,23 @@ fun LoginScreen(navController: NavController) {
             ) {
                 navController.navigate("register")
             }
+        }
+    }
+    when (loginState) {
+        is ResourceState.Loading -> {
+            Loader()
+        }
+        is ResourceState.Success -> {
+            navController.navigate(Screen.Dashboard.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
+            }
+        }
+        is ResourceState.Error -> {
+            errorMessage = (loginState as ResourceState.Error).error
+        }
+
+        is ResourceState.Idle -> {
+            //DO NOTHING
         }
     }
 }
