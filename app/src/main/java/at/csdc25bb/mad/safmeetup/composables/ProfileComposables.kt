@@ -4,6 +4,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,10 +13,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.filled.RemoveCircleOutline
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -179,4 +188,136 @@ fun profilePasswordTextField(
         label = { Text(label) }
     )
     return password
+}
+
+@Composable
+fun TeamMemberEntry(
+    member: List<String>,
+    userIsAdmin: Boolean,
+    onIconClick: (ImageVector, Boolean, String, String, String, () -> Unit) -> Unit,
+    onChangeSuccess: (List<String>?) -> Unit
+) {
+    val currentMember = member.toMutableList()
+    Row(
+        modifier = Modifier
+
+            .border(0.1.dp, MaterialTheme.colorScheme.outline)
+            .padding(15.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row {
+            Icon(
+                imageVector = if (currentMember[0] == "Admin") Icons.Default.VerifiedUser else Icons.Default.Person,
+                contentDescription = "Icon of user",
+                modifier = Modifier.padding(end = 10.dp)
+            )
+            Text(text = currentMember[1])
+        }
+        Row {
+            if (userIsAdmin) {
+                if (currentMember[2] != "pending") {
+                    if (currentMember[2] != "You") {
+                        val memberIsAdmin = currentMember[0] == "Admin"
+                        val adminIcon =
+                            if (!memberIsAdmin) Icons.Default.VerifiedUser else Icons.Default.PersonOutline
+                        val adminAction = "${if (memberIsAdmin) "Revoke" else "Grant"} rights"
+                        CustomIconButton(
+                            onClick = {
+                                onIconClick(
+                                    adminIcon,
+                                    false,
+                                    if (memberIsAdmin) "Admin Removal" else "Admin Addition",
+                                    "You're about to ${if (memberIsAdmin) "revoke the admin rights of" else "grant admin rights to"} ${currentMember[1]}.",
+                                    adminAction
+                                ) {
+                                    if (!memberIsAdmin) {
+                                        // TODO: API call to make user admin
+                                        currentMember[0] = "Admin"
+                                    } else {
+
+                                        // TODO: API call to remove users admin rights
+                                        currentMember[0] = "User"
+                                    }
+                                    onChangeSuccess(currentMember)
+                                }
+                            },
+                        ) {
+                            Icon(
+                                imageVector = adminIcon,
+                                contentDescription = adminAction
+                            )
+                        }
+                        val removeIcon = Icons.Default.DeleteOutline
+                        val removeAction = "Remove user"
+                        CustomIconButton(
+                            onClick = {
+                                onIconClick(
+                                    removeIcon,
+                                    true,
+                                    "Remove User from Team",
+                                    "You're about to remove ${currentMember[1]} from the team.",
+                                    removeAction
+                                ) {
+                                    // TODO: API call to remove user from team
+                                    onChangeSuccess(null)
+                                }
+                            },
+                            modifier = Modifier.padding(start = 10.dp)
+                        ) {
+                            Icon(
+                                imageVector = removeIcon,
+                                contentDescription = removeAction
+                            )
+                        }
+                    }
+                } else {
+                    val acceptIcon = Icons.Default.CheckCircleOutline
+                    val acceptAction = "Accept user"
+                    CustomIconButton(
+                        onClick = {
+                            onIconClick(
+                                acceptIcon,
+                                false,
+                                "Accept User to Team",
+                                "You're about to accept ${currentMember[1]} to the team.",
+                                acceptAction
+                            ) {
+                                // TODO: API call to accept user to team
+                                currentMember[2] = ""
+                                onChangeSuccess(currentMember)
+                            }
+                        },
+                        modifier = Modifier.padding(end = 10.dp)
+                    ) {
+                        Icon(
+                            imageVector = acceptIcon,
+                            contentDescription = acceptAction
+                        )
+                    }
+                    val declineIcon = Icons.Default.RemoveCircleOutline
+                    val declineAction = "Decline user"
+                    CustomIconButton(
+                        onClick = {
+                            onIconClick(
+                                declineIcon,
+                                true,
+                                "Decline User from Team",
+                                "You're about to decline ${currentMember[1]} from the team.",
+                                declineAction
+                            ) {
+                                // TODO: API call to decline user from team
+                                onChangeSuccess(null)
+                            }
+                        },
+                    ) {
+                        Icon(
+                            imageVector = declineIcon,
+                            contentDescription = declineAction
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.TextStyle
@@ -22,18 +24,36 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import at.csdc25bb.mad.safmeetup.composables.ActivityCard
+import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
+import at.csdc25bb.mad.safmeetup.composables.AdvancedFilterBottomSheet
+import at.csdc25bb.mad.safmeetup.composables.BottomSheet
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
-import at.csdc25bb.mad.safmeetup.composables.datePicker
-import at.csdc25bb.mad.safmeetup.composables.searchBar
+import at.csdc25bb.mad.safmeetup.composables.GermanDateTimeFormatter
+import at.csdc25bb.mad.safmeetup.composables.HorizontalDatePicker
+import at.csdc25bb.mad.safmeetup.composables.LightGrayDivider
+import at.csdc25bb.mad.safmeetup.composables.SearchBar
+import at.csdc25bb.mad.safmeetup.navigation.Screen
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @Composable
 fun DashboardScreen(navController: NavHostController) {
     val dashboardPadding = 15.dp
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var bottomSheetContent by remember { mutableStateOf<@Composable () -> Unit>({}) }
+    BottomSheet(showBottomSheet, { showBottomSheet = false }) { bottomSheetContent() }
+
     Scaffold(
-        bottomBar = { DashboardProfileBottomBar(navController, true) },
+        bottomBar = {
+            DashboardProfileBottomBar(navController, true) {
+                bottomSheetContent = {
+                    ActivityCreationBottomSheet {
+                        showBottomSheet = false
+                        navController.navigate(Screen.Dashboard.route)
+                    }
+                }
+                showBottomSheet = true
+            }
+        },
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -51,25 +71,51 @@ fun DashboardScreen(navController: NavHostController) {
                     style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 22.sp)
                 )
             }
-            val pickedDate: LocalDate? = datePicker()
-            val searchText: String =
-                searchBar(modifier = Modifier.padding(horizontal = dashboardPadding))
-            Divider(
-                modifier = Modifier
+            var keywords by remember { mutableStateOf("") }
+            var subject by remember { mutableStateOf("") }
+            var location by remember { mutableStateOf("") }
+            var type by remember { mutableStateOf("") }
+            var pickedDate: LocalDate? by remember { mutableStateOf(null) }
+
+            HorizontalDatePicker(pickedDate) { newDate -> pickedDate = newDate }
+            SearchBar(
+                modifier = Modifier.padding(horizontal = dashboardPadding),
+                onChange = { newKeywords ->
+                    keywords = newKeywords
+                }, onClickResetFilter = {
+                    keywords = ""
+                    subject = ""
+                    location = ""
+                    pickedDate = null
+                    type = ""
+                }) {
+                bottomSheetContent =
+                    {
+                        AdvancedFilterBottomSheet(subject, location, pickedDate, type,
+                            onApplyFilter = { newSubject, newLocation, newDate, newType ->
+                                subject = newSubject
+                                location = newLocation
+                                pickedDate = newDate
+                                type = newType
+                                showBottomSheet = false
+                            })
+                    }
+                showBottomSheet = true
+            }
+            LightGrayDivider(
+                Modifier
                     .width(LocalConfiguration.current.screenWidthDp.dp)
                     .padding(bottom = 5.dp)
-                    .padding(horizontal = 4.dp),
-                color = MaterialTheme.colorScheme.outline
+                    .padding(horizontal = 4.dp)
             )
 
             // BEGINNING of mocking data for testing
-            val dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy", Locale.GERMAN)
             val listOfActivities = mutableListOf<List<String>>()
             listOfActivities.add(
                 listOf(
                     "Weekly Training",
                     "Training",
-                    LocalDate.now().format(dateTimeFormatter),
+                    LocalDate.now().format(GermanDateTimeFormatter),
                     "FH Campus Gym"
                 )
             )
@@ -77,7 +123,7 @@ fun DashboardScreen(navController: NavHostController) {
                 listOf(
                     "Game against Eagles",
                     "Game",
-                    LocalDate.now().plusDays(3).format(dateTimeFormatter),
+                    LocalDate.now().plusDays(3).format(GermanDateTimeFormatter),
                     "FH Technikum Gym"
                 )
             )
@@ -85,7 +131,7 @@ fun DashboardScreen(navController: NavHostController) {
                 listOf(
                     "Hike",
                     "Other Activity",
-                    LocalDate.now().plusDays(5).format(dateTimeFormatter),
+                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
                     "Kahlenberg"
                 )
             )
@@ -93,7 +139,7 @@ fun DashboardScreen(navController: NavHostController) {
                 listOf(
                     "Going to a restaurant",
                     "Other Activity",
-                    LocalDate.now().plusDays(5).format(dateTimeFormatter),
+                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
                     "Das Zehn"
                 )
             )
@@ -105,16 +151,25 @@ fun DashboardScreen(navController: NavHostController) {
                     .padding(horizontal = dashboardPadding)
             ) {
                 val filteredActivities = listOfActivities.filter { activity ->
-                    val matchesSearchText = searchText.isEmpty() ||
-                            activity[0].lowercase().contains(searchText.lowercase()) ||
-                            activity[1].lowercase().contains(searchText.lowercase()) ||
-                            activity[3].lowercase().contains(searchText.lowercase())
+                    val matchesSearchText = keywords.isEmpty() ||
+                            activity[0].lowercase().contains(keywords.lowercase()) ||
+                            activity[1].lowercase().contains(keywords.lowercase()) ||
+                            activity[3].lowercase().contains(keywords.lowercase())
+
+                    val matchesSubject =
+                        subject.isEmpty() || activity[0].lowercase().contains(subject.lowercase())
+
+                    val matchesLocation =
+                        location.isEmpty() || activity[3].lowercase().contains(location.lowercase())
 
                     val matchesPickedDate = pickedDate?.let {
-                        activity[2] == it.format(dateTimeFormatter)
+                        activity[2] == it.format(GermanDateTimeFormatter)
                     } ?: true
 
-                    matchesSearchText && matchesPickedDate
+                    val matchesType =
+                        type.isEmpty() || activity[1].lowercase().contains(type.lowercase())
+
+                    matchesSearchText && matchesSubject && matchesLocation && matchesPickedDate && matchesType
                 }
                 items(filteredActivities.size) {
                     val activity =
@@ -124,7 +179,9 @@ fun DashboardScreen(navController: NavHostController) {
                         type = activity[1],
                         date = activity[2],
                         location = activity[3]
-                    )
+                    ) {
+                        navController.navigate(Screen.Activity.withId("ActivityId")) // TODO: Pass the actual ID here
+                    }
                 }
             }
         }
