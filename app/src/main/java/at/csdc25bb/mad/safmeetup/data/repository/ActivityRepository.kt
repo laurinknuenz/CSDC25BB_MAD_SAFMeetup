@@ -33,6 +33,22 @@ class ActivityRepository @Inject constructor(
             )
         }
     }
+
+    suspend fun getAllActivitiesForUserFetched(): Flow<List<Activity>> {
+        return flow {
+            val response = activityDataSource.getAllActivitiesForUser()
+
+            if (response.isSuccessful && response.body() != null) {
+                val activityData = response.body()!!.data
+                emit(activityData)
+            } else {
+                emit(mutableListOf())
+            }
+        }.catch { e ->
+            emit(mutableListOf())
+        }
+    }
+
     suspend fun createActivity(
         subject: String,
         activityType: String,

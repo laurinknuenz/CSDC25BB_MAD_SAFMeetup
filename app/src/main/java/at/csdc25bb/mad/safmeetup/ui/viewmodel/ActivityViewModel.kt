@@ -24,6 +24,8 @@ class ActivityViewModel @Inject constructor(
 
     val userActivities: StateFlow<ResourceState<List<Activity>>> = _userActivities
 
+    val activities: MutableList<Activity> = mutableListOf()
+
     fun getAllActivitiesForUser() {
         viewModelScope.launch ( Dispatchers.IO ) {
             activityRepository.getAllActivitiesForUser().collectLatest { activityResponse ->
@@ -31,6 +33,20 @@ class ActivityViewModel @Inject constructor(
                 _userActivities.value = activityResponse
             }
         }
+    }
+
+    fun getAllActivitiesForUserFetched(): MutableList<Activity> {
+        viewModelScope.launch ( Dispatchers.IO ) {
+            activityRepository.getAllActivitiesForUserFetched().collectLatest { activityResponse ->
+                activities.clear()
+                activities.addAll(activityResponse)
+                Log.d(TAG, "In the fetch function")
+                Log.d(TAG, activityResponse.toString())
+            }
+        }
+        Log.d(TAG, "Returning from the fetch function")
+        Log.d(TAG, activities.toString())
+        return activities
     }
 
     fun createActivity(
@@ -49,10 +65,10 @@ class ActivityViewModel @Inject constructor(
         }
     }
 
-    init {
-        Log.d(TAG, "In the init function of the $TAG")
-        getAllActivitiesForUser()
-    }
+//    init {
+//        Log.d(TAG, "In the init function of the $TAG")
+//        getAllActivitiesForUser()
+//    }
 
     companion object {
         const val TAG = "ActivityViewModel"

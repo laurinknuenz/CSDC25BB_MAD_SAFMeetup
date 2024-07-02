@@ -31,10 +31,10 @@ import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.AdvancedFilterBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.BottomSheet
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
-import at.csdc25bb.mad.safmeetup.composables.GermanDateTimeFormatter
 import at.csdc25bb.mad.safmeetup.composables.HorizontalDatePicker
 import at.csdc25bb.mad.safmeetup.composables.LightGrayDivider
 import at.csdc25bb.mad.safmeetup.composables.SearchBar
+import at.csdc25bb.mad.safmeetup.data.entity.activity.Activity
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import at.csdc25bb.mad.safmeetup.navigation.Screen
 import at.csdc25bb.mad.safmeetup.ui.viewmodel.ActivityViewModel
@@ -47,7 +47,8 @@ fun DashboardScreen(
     activityViewModel: ActivityViewModel = hiltViewModel(),
     teamViewModel: TeamViewModel = hiltViewModel()
 ) {
-    val userActivities by activityViewModel.userActivities.collectAsState()
+    var userActivitiesFetched by remember { mutableStateOf(listOf<Activity>()) }
+
     val managedTeam by teamViewModel.managedTeam.collectAsState()
 
     var currentTeamName by remember { mutableStateOf("") }
@@ -55,6 +56,9 @@ fun DashboardScreen(
     val dashboardPadding = 15.dp
     var showBottomSheet by remember { mutableStateOf(false) }
     var bottomSheetContent by remember { mutableStateOf<@Composable () -> Unit>({}) }
+
+    userActivitiesFetched = activityViewModel.getAllActivitiesForUserFetched()
+
     BottomSheet(showBottomSheet, { showBottomSheet = false }) { bottomSheetContent() }
 
     Scaffold(
@@ -167,13 +171,13 @@ fun DashboardScreen(
                     .padding(horizontal = 4.dp)
             )
 
-            when(userActivities) {
-                is ResourceState.Loading -> {
-                    Log.d("DASHBOARD-SCREEN", "Still loading")
-                }
-
-                is ResourceState.Success -> {
-                    val response = (userActivities as ResourceState.Success).data
+//            when(userActivities) {
+//                is ResourceState.Loading -> {
+//                    Log.d("DASHBOARD-SCREEN", "Still loading")
+//                }
+//
+//                is ResourceState.Success -> {
+                    val response = userActivitiesFetched
                     Log.d("DASHBOARD-SCREEN", "Activities: ${response}")
                     LazyColumn(
                         modifier = Modifier
@@ -220,49 +224,49 @@ fun DashboardScreen(
                             }
                         }
                     }
-                }
-                is ResourceState.Error -> {
-                    Log.d("DASHBOARD-SCREEN", "Error loading activity")
-                }
-
-                is ResourceState.Idle -> {
-                    //DO NOTHING
-                }
-            }
+//                }
+//                is ResourceState.Error -> {
+//                    Log.d("DASHBOARD-SCREEN", "Error loading activity")
+//                }
+//
+//                is ResourceState.Idle -> {
+//                    //DO NOTHING
+//                }
+//            }
             // BEGINNING of mocking data for testing
-            val listOfActivities = mutableListOf<List<String>>()
-            listOfActivities.add(
-                listOf(
-                    "Weekly Training",
-                    "Training",
-                    LocalDate.now().format(GermanDateTimeFormatter),
-                    "FH Campus Gym"
-                )
-            )
-            listOfActivities.add(
-                listOf(
-                    "Game against Eagles",
-                    "Game",
-                    LocalDate.now().plusDays(3).format(GermanDateTimeFormatter),
-                    "FH Technikum Gym"
-                )
-            )
-            listOfActivities.add(
-                listOf(
-                    "Hike",
-                    "Other Activity",
-                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
-                    "Kahlenberg"
-                )
-            )
-            listOfActivities.add(
-                listOf(
-                    "Going to a restaurant",
-                    "Other Activity",
-                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
-                    "Das Zehn"
-                )
-            )
+//            val listOfActivities = mutableListOf<List<String>>()
+//            listOfActivities.add(
+//                listOf(
+//                    "Weekly Training",
+//                    "Training",
+//                    LocalDate.now().format(GermanDateTimeFormatter),
+//                    "FH Campus Gym"
+//                )
+//            )
+//            listOfActivities.add(
+//                listOf(
+//                    "Game against Eagles",
+//                    "Game",
+//                    LocalDate.now().plusDays(3).format(GermanDateTimeFormatter),
+//                    "FH Technikum Gym"
+//                )
+//            )
+//            listOfActivities.add(
+//                listOf(
+//                    "Hike",
+//                    "Other Activity",
+//                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
+//                    "Kahlenberg"
+//                )
+//            )
+//            listOfActivities.add(
+//                listOf(
+//                    "Going to a restaurant",
+//                    "Other Activity",
+//                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
+//                    "Das Zehn"
+//                )
+//            )
             // END of mocking data for testing
 
 
