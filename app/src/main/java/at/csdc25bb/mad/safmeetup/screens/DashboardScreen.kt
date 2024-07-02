@@ -44,9 +44,13 @@ import java.time.LocalDate
 @Composable
 fun DashboardScreen(
     navController: NavHostController,
-    activityViewModel: ActivityViewModel = hiltViewModel()
+    activityViewModel: ActivityViewModel = hiltViewModel(),
+    teamViewModel: TeamViewModel = hiltViewModel()
 ) {
     val userActivities by activityViewModel.userActivities.collectAsState()
+    val managedTeam by teamViewModel.managedTeam.collectAsState()
+
+    var currentTeamName by remember { mutableStateOf("") }
 
     val dashboardPadding = 15.dp
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -57,7 +61,29 @@ fun DashboardScreen(
         bottomBar = {
             DashboardProfileBottomBar(navController, true) {
                 bottomSheetContent = {
-                    ActivityCreationBottomSheet {
+                    when (managedTeam) {
+                        is ResourceState.Loading -> {
+                            Log.d("DASHBOARD-SCREEN", "Loading team...")
+                            teamViewModel.getTeamByManager()
+                        }
+
+                        is ResourceState.Success -> {
+                            val managedTeamResponse =
+                                (managedTeam as ResourceState.Success).data
+
+                            currentTeamName = managedTeamResponse.name
+                        }
+
+                        is ResourceState.Error -> {
+                            Log.d("DASHBOARD-SCREEN", "Error loading team")
+                        }
+
+                        is ResourceState.Idle -> TODO()
+                    }
+                    ActivityCreationBottomSheet (
+                        activityViewModel = activityViewModel,
+                        currentTeam = currentTeamName
+                    ){
                         showBottomSheet = false
                         navController.navigate(Screen.Dashboard.route)
                     }

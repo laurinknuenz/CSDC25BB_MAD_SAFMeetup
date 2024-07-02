@@ -33,6 +33,40 @@ class ActivityRepository @Inject constructor(
             )
         }
     }
+    suspend fun createActivity(
+        subject: String,
+        activityType: String,
+        team: String,
+        opponent: String,
+        location: String,
+    ): Flow<ResourceState<List<Activity>>> {
+        return flow {
+            emit(ResourceState.Loading())
+            Log.d(
+                TeamRepository.TAG,
+                "[ACTIVITY-REPO] Sending request to create activity $subject for the team $team"
+            )
+            val response =
+                activityDataSource.createActivity(subject, activityType, team, opponent, location)
+            Log.d(TeamRepository.TAG, response.body().toString())
+
+            if (response.isSuccessful && response.body() != null) {
+                val activityData = response.body()!!.data
+                Log.d(TeamRepository.TAG, activityData.toString())
+                emit(ResourceState.Success(activityData))
+            } else {
+                emit(ResourceState.Error("Error fetching Activities data for user"))
+            }
+        }.catch { e ->
+            emit(
+                ResourceState.Error(
+                    e.localizedMessage
+                        ?: "Error in flow while retrieving activities data for user"
+                )
+            )
+        }
+    }
+
     companion object {
         const val TAG = "ActivityRepository"
     }

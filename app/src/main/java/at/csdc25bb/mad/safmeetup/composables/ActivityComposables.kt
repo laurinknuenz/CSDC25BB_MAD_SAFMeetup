@@ -2,6 +2,7 @@
 
 package at.csdc25bb.mad.safmeetup.composables
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.ActivityViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -145,12 +147,16 @@ fun ParticipationButton(firstButton: Boolean, participation: Boolean, onClick: (
 }
 
 @Composable
-fun ActivityCreationBottomSheet(onCreation: () -> Unit) {
+fun ActivityCreationBottomSheet(
+    activityViewModel: ActivityViewModel,
+    currentTeam: String,
+    onCreation: () -> Unit,
+) {
     var message by remember { mutableStateOf("") }
 
-    var subject = ""
-    var location = ""
-    var opponent = ""
+    var subject by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+    var opponent by remember { mutableStateOf("") }
     var selectedDate: LocalDate? by remember { mutableStateOf(null) }
     var showExtendedDatePicker by remember { mutableStateOf(false) }
 
@@ -159,6 +165,8 @@ fun ActivityCreationBottomSheet(onCreation: () -> Unit) {
             onClose = { showExtendedDatePicker = false },
             onChangeDate = { newDate -> selectedDate = newDate })
     }
+
+    Log.d("ActivityCreationBottomSheet", "Current team name $currentTeam")
 
     SmallTitle(title = "Create new Activity")
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -189,12 +197,19 @@ fun ActivityCreationBottomSheet(onCreation: () -> Unit) {
 
     BottomSheetTextField(label = "Subject") { newSubject -> subject = newSubject }
     BottomSheetTextField(label = "Location") { newLocation -> location = newLocation }
-    val selectedType = activityTypeSelector("")
+    val selectedType = activityTypeSelector("Other Activity")
     if (selectedType == "Game")
         BottomSheetTextField(label = "Opponent") { newOpponent -> opponent = newOpponent }
     BottomSheetMessage(message = message)
     AppButton(text = "Create Activity") {
-        // TODO: Make api call here to create activity
+        activityViewModel.createActivity(
+            subject,
+            selectedType,
+            currentTeam,
+            opponent,
+            location,
+//            selectedDate.toString()
+        )
         if (true) onCreation() // on Success of API call, on error display message by changing message value
     }
 }

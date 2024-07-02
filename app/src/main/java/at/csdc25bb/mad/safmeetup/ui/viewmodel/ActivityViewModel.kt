@@ -33,6 +33,22 @@ class ActivityViewModel @Inject constructor(
         }
     }
 
+    fun createActivity(
+        subject: String,
+        activityType: String,
+        team: String,
+        opponent: String,
+        location: String,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            activityRepository.createActivity(subject, activityType, team, opponent, location)
+                .collectLatest { activityResponse ->
+                    Log.d(TAG, activityResponse.toString())
+                    _userActivities.value = activityResponse
+                }
+        }
+    }
+
     init {
         Log.d(TAG, "In the init function of the $TAG")
         getAllActivitiesForUser()

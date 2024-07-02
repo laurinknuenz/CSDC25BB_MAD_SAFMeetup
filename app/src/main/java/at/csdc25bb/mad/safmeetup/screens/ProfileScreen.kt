@@ -60,6 +60,7 @@ import at.csdc25bb.mad.safmeetup.composables.profileDetailLine
 import at.csdc25bb.mad.safmeetup.data.entity.team.TeamUser
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import at.csdc25bb.mad.safmeetup.navigation.Screen
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.ActivityViewModel
 import at.csdc25bb.mad.safmeetup.ui.viewmodel.AuthViewModel
 import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
 import at.csdc25bb.mad.safmeetup.ui.viewmodel.UserViewModel
@@ -71,9 +72,12 @@ fun ProfileScreen(
     manager: Boolean = true,
     userViewModel: UserViewModel = hiltViewModel(),
     teamViewModel: TeamViewModel = hiltViewModel(),
+    activityViewModel: ActivityViewModel = hiltViewModel(),
 ) {
     val currentUser by userViewModel.user.collectAsState()
     val managedTeam by teamViewModel.managedTeam.collectAsState()
+
+    var currentTeamName by remember { mutableStateOf("") }
 
     var errorMessage by remember { mutableStateOf("") }
     val logoutState by authViewModel.logoutState.collectAsState()
@@ -119,7 +123,10 @@ fun ProfileScreen(
             DashboardProfileBottomBar(navController, false) {
                 bottomSheetContent =
                     {
-                        ActivityCreationBottomSheet {
+                        ActivityCreationBottomSheet (
+                            activityViewModel = activityViewModel,
+                            currentTeam = currentTeamName
+                        )  {
                             navController.navigate(Screen.Dashboard.route)
                             showBottomSheet = false
                         }
@@ -169,6 +176,8 @@ fun ProfileScreen(
                                         userIsPartOfTeam = true
                                         val managedTeamResponse =
                                             (managedTeam as ResourceState.Success).data
+
+                                        currentTeamName = managedTeamResponse.name
 
                                         val safePendingMembers =
                                             managedTeamResponse.pendingMembers ?: mutableListOf()
