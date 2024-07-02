@@ -8,5 +8,5 @@ data class Activity(
     val opponent: ActivityTeam,
 //    val date: Date,
     val location: String,
-    val listOfGuests: List<ActivityGuest>
+    val listOfGuests: List<ActivityGuest>?
 )

@@ -45,6 +45,7 @@ fun ActivityCard(
     id: String = "", // Needed for participation change
     title: String = "Your Activity",
     type: String = "Training",
+    team: String = "",
     date: String = "Friday, 28. June 2024", // TODO: Change this to date or make it somehow to convert format to german format
     location: String = "FH Campus Wien Gym",
     participates: Boolean = true,
@@ -69,6 +70,7 @@ fun ActivityCard(
                     .fillMaxWidth()
                     .padding(vertical = 5.dp)
             )
+            ActivityDetailLine(detail = "Team", team)
             ActivityDetailLine(detail = "Date", date)
             ActivityDetailLine(detail = "Location", location)
 

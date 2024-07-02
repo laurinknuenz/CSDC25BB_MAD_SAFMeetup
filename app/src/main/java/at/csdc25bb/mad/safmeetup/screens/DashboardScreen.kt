@@ -38,6 +38,7 @@ import at.csdc25bb.mad.safmeetup.composables.SearchBar
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import at.csdc25bb.mad.safmeetup.navigation.Screen
 import at.csdc25bb.mad.safmeetup.ui.viewmodel.ActivityViewModel
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
 import java.time.LocalDate
 
 @Composable
@@ -185,6 +186,7 @@ fun DashboardScreen(
                             ActivityCard(
                                 title = activity.subject,
                                 type = activity.type.name,
+                                team = activity.hostingTeam.name,
 //                                date = activity.date.toString(),
                                 location = activity.location
                             ) {

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
 
 @Composable
 fun TeamCreationBottomSheet(onSuccess: () -> Unit) {
@@ -40,7 +41,10 @@ fun TeamCreationBottomSheet(onSuccess: () -> Unit) {
 }
 
 @Composable
-fun TeamJoiningBottomSheet() {
+fun TeamJoiningBottomSheet(
+    userId: String = "",
+    teamViewModel: TeamViewModel,
+) {
     SmallTitle(title = "Join new Team")
     Column(verticalArrangement = Arrangement.Center) {
         var message by remember { mutableStateOf("") }
@@ -48,39 +52,42 @@ fun TeamJoiningBottomSheet() {
 
         BottomSheetTextField("Invite Code") { newInviteCode -> inviteCode = newInviteCode }
         BottomSheetMessage(message = message)
-        AppButton(text = "Join Team") {
-            // TODO: Make api call here to request team joining
-            message = "Superb! Wait for an admin of the team to accept your join request."
-        }
+        AppButton(
+            text = "Join Team",
+            onClick = {
+                teamViewModel.joinTeam(userId, inviteCode)
+                message = "Superb! Wait for an admin of the team to accept your join request."
+            }
+        )
     }
 }
 
-@Composable
-fun TeamSwitchBottomSheet(
-    teams: List<String> = listOf(
-        "Laurins Team",
-        "Sorins Super Team",
-        "Renés Soccer Team"
-    ),
-    onChoosing: (String) -> Unit
-) {
-    SmallTitle(title = "Switch Teams")
-    teams.forEach { team ->
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(3.dp))
-                    .clickable(onClick = {
-                        // TODO: Call the data of the coosen team to display
-                        if (true) onChoosing(team) // OnSuccess of API call
-                    }),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(text = team, style = TextStyle(fontSize = 18.sp))
+    @Composable
+    fun TeamSwitchBottomSheet(
+        teams: List<String> = listOf(
+            "Laurins Team",
+            "Sorins Super Team",
+            "Renés Soccer Team"
+        ),
+        onChoosing: (String) -> Unit,
+    ) {
+        SmallTitle(title = "Switch Teams")
+        teams.forEach { team ->
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(3.dp))
+                        .clickable(onClick = {
+                            // TODO: Call the data of the coosen team to display
+                            if (true) onChoosing(team) // OnSuccess of API call
+                        }),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = team, style = TextStyle(fontSize = 18.sp))
+                }
             }
         }
     }
-}

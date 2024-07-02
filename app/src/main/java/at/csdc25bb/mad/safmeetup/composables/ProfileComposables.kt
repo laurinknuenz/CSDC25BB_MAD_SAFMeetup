@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.outlined.Check
@@ -40,6 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import at.csdc25bb.mad.safmeetup.data.entity.team.TeamUser
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
 
 @Composable
 fun profileDetailLine(
@@ -192,12 +193,14 @@ fun profilePasswordTextField(
 
 @Composable
 fun TeamMemberEntry(
-    member: List<String>,
-    userIsAdmin: Boolean,
+    member: TeamUser,
+    teamName: String,
+    userIsAdmin: Boolean = false,
+    userIsPending: Boolean = false,
+    teamViewModel: TeamViewModel,
     onIconClick: (ImageVector, Boolean, String, String, String, () -> Unit) -> Unit,
-    onChangeSuccess: (List<String>?) -> Unit
+    onChangeSuccess: (List<String>?) -> Unit = {}
 ) {
-    val currentMember = member.toMutableList()
     Row(
         modifier = Modifier
 
@@ -208,68 +211,35 @@ fun TeamMemberEntry(
     ) {
         Row {
             Icon(
-                imageVector = if (currentMember[0] == "Admin") Icons.Default.VerifiedUser else Icons.Default.Person,
+                imageVector = if (userIsAdmin) Icons.Default.VerifiedUser else Icons.Default.Person,
                 contentDescription = "Icon of user",
                 modifier = Modifier.padding(end = 10.dp)
             )
-            Text(text = currentMember[1])
+            Text(text = member.firstname)
         }
         Row {
-            if (userIsAdmin) {
-                if (currentMember[2] != "pending") {
-                    if (currentMember[2] != "You") {
-                        val memberIsAdmin = currentMember[0] == "Admin"
-                        val adminIcon =
-                            if (!memberIsAdmin) Icons.Default.VerifiedUser else Icons.Default.PersonOutline
-                        val adminAction = "${if (memberIsAdmin) "Revoke" else "Grant"} rights"
-                        CustomIconButton(
-                            onClick = {
-                                onIconClick(
-                                    adminIcon,
-                                    false,
-                                    if (memberIsAdmin) "Admin Removal" else "Admin Addition",
-                                    "You're about to ${if (memberIsAdmin) "revoke the admin rights of" else "grant admin rights to"} ${currentMember[1]}.",
-                                    adminAction
-                                ) {
-                                    if (!memberIsAdmin) {
-                                        // TODO: API call to make user admin
-                                        currentMember[0] = "Admin"
-                                    } else {
-
-                                        // TODO: API call to remove users admin rights
-                                        currentMember[0] = "User"
-                                    }
-                                    onChangeSuccess(currentMember)
-                                }
-                            },
-                        ) {
-                            Icon(
-                                imageVector = adminIcon,
-                                contentDescription = adminAction
-                            )
-                        }
-                        val removeIcon = Icons.Default.DeleteOutline
-                        val removeAction = "Remove user"
-                        CustomIconButton(
-                            onClick = {
-                                onIconClick(
-                                    removeIcon,
-                                    true,
-                                    "Remove User from Team",
-                                    "You're about to remove ${currentMember[1]} from the team.",
-                                    removeAction
-                                ) {
-                                    // TODO: API call to remove user from team
-                                    onChangeSuccess(null)
-                                }
-                            },
-                            modifier = Modifier.padding(start = 10.dp)
-                        ) {
-                            Icon(
-                                imageVector = removeIcon,
-                                contentDescription = removeAction
-                            )
-                        }
+            if (!userIsAdmin) {
+                if (!userIsPending) {
+                    val removeIcon = Icons.Default.DeleteOutline
+                    val removeAction = "Remove user"
+                    CustomIconButton(
+                        onClick = {
+                            onIconClick(
+                                removeIcon,
+                                true,
+                                "Remove User from Team",
+                                "You're about to remove ${member.firstname} from the team.",
+                                removeAction
+                            ) {
+                                teamViewModel.removeUserFromTeam(member._id, teamName)
+                            }
+                        },
+                        modifier = Modifier.padding(start = 10.dp)
+                    ) {
+                        Icon(
+                            imageVector = removeIcon,
+                            contentDescription = removeAction
+                        )
                     }
                 } else {
                     val acceptIcon = Icons.Default.CheckCircleOutline
@@ -280,12 +250,10 @@ fun TeamMemberEntry(
                                 acceptIcon,
                                 false,
                                 "Accept User to Team",
-                                "You're about to accept ${currentMember[1]} to the team.",
+                                "You're about to accept ${member.firstname} to the team.",
                                 acceptAction
                             ) {
-                                // TODO: API call to accept user to team
-                                currentMember[2] = ""
-                                onChangeSuccess(currentMember)
+                                teamViewModel.addUserToTeam(member._id, teamName)
                             }
                         },
                         modifier = Modifier.padding(end = 10.dp)
@@ -303,11 +271,10 @@ fun TeamMemberEntry(
                                 declineIcon,
                                 true,
                                 "Decline User from Team",
-                                "You're about to decline ${currentMember[1]} from the team.",
+                                "You're about to decline ${member.firstname} from the team.",
                                 declineAction
                             ) {
-                                // TODO: API call to decline user from team
-                                onChangeSuccess(null)
+                                teamViewModel.removeUserFromTeam(member._id, teamName)
                             }
                         },
                     ) {

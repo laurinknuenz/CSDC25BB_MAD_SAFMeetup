@@ -2,8 +2,9 @@ package at.csdc25bb.mad.safmeetup.data.repository
 
 import android.util.Log
 import at.csdc25bb.mad.safmeetup.data.datasource.TeamDataSource
-import at.csdc25bb.mad.safmeetup.data.entity.Team
+import at.csdc25bb.mad.safmeetup.data.entity.team.Team
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -13,13 +14,34 @@ class TeamRepository @Inject constructor(
     private val teamDataSource: TeamDataSource,
 ) {
 
-
     suspend fun getTeam(team: String): Flow<ResourceState<Team>> {
         return flow {
             emit(ResourceState.Loading())
 
             val response = teamDataSource.getTeam(team)
             Log.d("GET-TEAM", response.body().toString())
+
+            if (response.isSuccessful && response.body() != null) {
+                val teamData = response.body()!!.data
+                emit(ResourceState.Success(teamData))
+            } else {
+                emit(ResourceState.Error("Error fetching Team data"))
+            }
+        }.catch { e ->
+            emit(
+                ResourceState.Error(
+                    e.localizedMessage ?: "Error in flow while retrieving Team data"
+                )
+            )
+        }
+    }
+
+    suspend fun getTeamByManager(): Flow<ResourceState<Team>> {
+        return flow {
+            emit(ResourceState.Loading())
+
+            val response = teamDataSource.getTeamByManager()
+            Log.d("GET-TEAM-BY-MANAGER", response.body().toString())
 
             if (response.isSuccessful && response.body() != null) {
                 val teamData = response.body()!!.data
@@ -55,5 +77,55 @@ class TeamRepository @Inject constructor(
                 )
             )
         }
+    }
+
+    suspend fun joinTeam(userId: String, inviteCode: String): Unit {
+        try {
+            Log.d(TAG, "[TEAM-REPO] Sending request to join team")
+            val response = teamDataSource.joinTeam(userId, inviteCode)
+            Log.d(TAG, response.body().toString())
+
+            if (response.isSuccessful && response.body() != null) {
+                val teamData = response.body()!!.data
+                Log.d(TAG, teamData.pendingMembers.toString())
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Error while sending join request")
+        }
+    }
+
+
+    suspend fun addUserToTeam(userId: String, teamName: String): Unit {
+        try {
+            Log.d(TAG, "[TEAM-REPO] Sending request to add user $userId to the team $teamName")
+            val response = teamDataSource.addUserToTeam(userId, teamName)
+            Log.d(TAG, response.body().toString())
+
+            if (response.isSuccessful && response.body() != null) {
+                val teamData = response.body()!!.data
+                Log.d(TAG, teamData.pendingMembers.toString())
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Error while sending add request")
+        }
+    }
+
+    suspend fun removeUserFromTeam(userId: String, teamName: String): Unit {
+        try {
+            Log.d(TAG, "[TEAM-REPO] Sending request to remove user $userId from the team $teamName")
+            val response = teamDataSource.removeUserFromTeam(userId, teamName)
+            Log.d(TAG, response.body().toString())
+
+            if (response.isSuccessful && response.body() != null) {
+                val teamData = response.body()!!.data
+                Log.d(TAG, teamData.pendingMembers.toString())
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Error while sending remove request")
+        }
+    }
+
+    companion object {
+        const val TAG = "TeamRepository"
     }
 }
