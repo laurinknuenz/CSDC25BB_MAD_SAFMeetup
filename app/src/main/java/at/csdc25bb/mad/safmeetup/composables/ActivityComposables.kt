@@ -2,6 +2,8 @@
 
 package at.csdc25bb.mad.safmeetup.composables
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +37,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import at.csdc25bb.mad.safmeetup.SFMApplication
+import at.csdc25bb.mad.safmeetup.data.entity.activity.Activity
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.ActivityViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -42,14 +47,21 @@ import java.util.Locale
 
 @Composable
 fun ActivityCard(
-    id: String = "", // Needed for participation change
-    title: String = "Your Activity",
-    type: String = "Training",
-    date: String = "Friday, 28. June 2024", // TODO: Change this to date or make it somehow to convert format to german format
-    location: String = "FH Campus Wien Gym",
-    participates: Boolean = true,
+    activityViewModel: ActivityViewModel,
+    participates: Boolean,
+    activity: Activity = Activity(),
     onClick: () -> Unit
 ) {
+    val sharedPref = SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
+    var userId = sharedPref.getString("userId", "")
+
+    val id by remember { mutableStateOf(activity._id) }
+    val title by remember { mutableStateOf(activity.subject) }
+    val type by remember { mutableStateOf(activity.type.name) }
+    val team by remember { mutableStateOf(activity.hostingTeam.name) }
+    val location by remember { mutableStateOf(activity.location) }
+    val date by remember { mutableStateOf("Friday, 5. July 2024") }
+
     var participation by remember { mutableStateOf(participates) }
     Column(
         modifier = Modifier
@@ -69,6 +81,7 @@ fun ActivityCard(
                     .fillMaxWidth()
                     .padding(vertical = 5.dp)
             )
+            ActivityDetailLine(detail = "Team", team)
             ActivityDetailLine(detail = "Date", date)
             ActivityDetailLine(detail = "Location", location)
 
@@ -80,9 +93,19 @@ fun ActivityCard(
             Row(
             ) {
                 ParticipationButton(true, participation) {
-                    participation = true
+                    Log.d("ActivityCard", "Changing the $participation to true")
+                    if (userId != null) {
+                        activityViewModel.updateAttendanceForUser(id, userId, true)
+                        participation = !participation
+                    }
                 } // TODO: Add api call here to change participation
-                ParticipationButton(false, participation) { participation = false } // Here too
+                ParticipationButton(false, participation) {
+                    Log.d("ActivityCard", "Changing the $participation to false")
+                    if (userId != null) {
+                        activityViewModel.updateAttendanceForUser(id, userId, false)
+                        participation = !participation
+                    }
+                } // Here too
             }
         }
     }
@@ -143,12 +166,17 @@ fun ParticipationButton(firstButton: Boolean, participation: Boolean, onClick: (
 }
 
 @Composable
-fun ActivityCreationBottomSheet(onCreation: () -> Unit) {
+fun ActivityCreationBottomSheet(
+    activityViewModel: ActivityViewModel,
+    currentTeamName: String,
+    onCreation: () -> Unit,
+) {
     var message by remember { mutableStateOf("") }
 
-    var subject = ""
-    var location = ""
-    var opponent = ""
+    var subject by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+    var hostingTeam by remember { mutableStateOf("") }
+    var opponent by remember { mutableStateOf("") }
     var selectedDate: LocalDate? by remember { mutableStateOf(null) }
     var showExtendedDatePicker by remember { mutableStateOf(false) }
 
@@ -187,12 +215,20 @@ fun ActivityCreationBottomSheet(onCreation: () -> Unit) {
 
     BottomSheetTextField(label = "Subject") { newSubject -> subject = newSubject }
     BottomSheetTextField(label = "Location") { newLocation -> location = newLocation }
-    val selectedType = activityTypeSelector("")
+    BottomSheetTextField(label = "Hosting Team") { newHostingTeam -> hostingTeam = newHostingTeam }
+    val selectedType = activityTypeSelector("Other Activity")
     if (selectedType == "Game")
         BottomSheetTextField(label = "Opponent") { newOpponent -> opponent = newOpponent }
     BottomSheetMessage(message = message)
     AppButton(text = "Create Activity") {
-        // TODO: Make api call here to create activity
+        activityViewModel.createActivity(
+            subject,
+            selectedType,
+            hostingTeam,
+            opponent,
+            location,
+//            selectedDate.toString()
+        )
         if (true) onCreation() // on Success of API call, on error display message by changing message value
     }
 }

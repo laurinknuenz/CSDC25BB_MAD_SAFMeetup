@@ -1,5 +1,7 @@
 package at.csdc25bb.mad.safmeetup.screens
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,14 +17,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.GroupOff
 import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,14 +38,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import at.csdc25bb.mad.safmeetup.R
+import at.csdc25bb.mad.safmeetup.SFMApplication
 import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.AppButton
 import at.csdc25bb.mad.safmeetup.composables.BottomSheet
 import at.csdc25bb.mad.safmeetup.composables.DashboardProfileBottomBar
 import at.csdc25bb.mad.safmeetup.composables.InfoDialogParams
 import at.csdc25bb.mad.safmeetup.composables.InformationDialog
+import at.csdc25bb.mad.safmeetup.composables.Loader
 import at.csdc25bb.mad.safmeetup.composables.ProfilePageTopBar
 import at.csdc25bb.mad.safmeetup.composables.SmallTitle
 import at.csdc25bb.mad.safmeetup.composables.TeamCreationBottomSheet
@@ -54,13 +57,42 @@ import at.csdc25bb.mad.safmeetup.composables.TeamMemberEntry
 import at.csdc25bb.mad.safmeetup.composables.TeamSwitchBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.Title
 import at.csdc25bb.mad.safmeetup.composables.profileDetailLine
+import at.csdc25bb.mad.safmeetup.data.entity.team.Team
+import at.csdc25bb.mad.safmeetup.data.entity.team.TeamUser
+import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import at.csdc25bb.mad.safmeetup.navigation.Screen
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.ActivityViewModel
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.AuthViewModel
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.UserViewModel
 
 @Composable
-fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
+fun ProfileScreen(
+    navController: NavController,
+    authViewModel: AuthViewModel,
+    manager: Boolean = true,
+    userViewModel: UserViewModel = hiltViewModel(),
+    teamViewModel: TeamViewModel = hiltViewModel(),
+    activityViewModel: ActivityViewModel = hiltViewModel(),
+) {
+    val sharedPref =
+        SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
+    var userId = sharedPref.getString("userId", "")
+
+    val currentUser by userViewModel.user.collectAsState()
+    val joinedTeams by teamViewModel.allTeams.collectAsState()
+    val managedTeam by teamViewModel.managedTeam.collectAsState()
+
+    var currentTeam by remember { mutableStateOf(Team()) }
+
+    var currentTeamName by remember { mutableStateOf("") }
+
+    var errorMessage by remember { mutableStateOf("") }
+    val logoutState by authViewModel.logoutState.collectAsState()
+
     var userProfileSelected by remember { mutableStateOf(true) }
     var chosenTeam by remember { mutableStateOf("Laurins Team") }
-    val userIsPartOfTeam = true
+//    var userIsPartOfTeam by remember { mutableStateOf(false) }
 
     var openInformationDialog by remember { mutableStateOf(false) }
     var infoDialogParams by remember {
@@ -99,7 +131,10 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
             DashboardProfileBottomBar(navController, false) {
                 bottomSheetContent =
                     {
-                        ActivityCreationBottomSheet {
+                        ActivityCreationBottomSheet(
+                            activityViewModel = activityViewModel,
+                            currentTeamName = currentTeamName
+                        ) {
                             navController.navigate(Screen.Dashboard.route)
                             showBottomSheet = false
                         }
@@ -122,22 +157,125 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                         .padding(bottom = 15.dp)
                         .fillMaxWidth()
                 ) {
-                    if (userProfileSelected) UserProfile()
-                    else if (userIsPartOfTeam) TeamProfile(
-                        userIsAdmin = true, // TODO: Change this to check user role
-                        onIconClick = { icon: ImageVector, warning: Boolean, title: String,
-                                        dialogText: String, confirmButtonText: String, onClick: () -> Unit ->
-                            infoDialogParams = InfoDialogParams(
-                                icon = icon,
-                                warning = warning,
-                                title = title,
-                                dialogText = dialogText,
-                                confirmButtonText = confirmButtonText
-                            ) { onClick() }
-                            openInformationDialog = true
+                    when (currentUser) {
+                        is ResourceState.Loading -> {
+                            Log.d("PROFILE-SCREEN", "Still loading")
+                            Loader()
+                            teamViewModel.getTeamByManager()
+                            if (userId != null) {
+                                teamViewModel.getTeamsForUser(userId)
+                            }
                         }
-                    )
-                    else NoTeamScreen()
+
+                        is ResourceState.Success -> {
+                            val userResponse = (currentUser as ResourceState.Success).data
+                            if (userProfileSelected) {
+                                UserProfile(
+                                    username = userResponse.username,
+                                    firstName = userResponse.firstname,
+                                    lastName = userResponse.lastname,
+                                    email = userResponse.email
+                                )
+                            } else {
+
+                                if (joinedTeams.isEmpty()){
+                                    NoTeamScreen()
+                                } else {
+                                    Column {
+                                        for (team in joinedTeams) {
+                                            val safePendingMembers =
+                                                team.pendingMembers ?: mutableListOf()
+                                            TeamProfile(
+                                                teamName = team.name,
+                                                typeOfSport = team.typeOfSport,
+                                                manager = team.manager,
+                                                inviteCode = team.inviteCode,
+                                                members = team.members,
+                                                pendingMembers = safePendingMembers,
+                                                userIsAdmin = true, // TODO: Change this to check user role
+                                                teamViewModel = teamViewModel,
+                                                onIconClick = {
+                                                        icon: ImageVector, warning: Boolean, title: String,
+                                                        dialogText: String, confirmButtonText: String, onClick: () -> Unit,
+                                                    ->
+                                                    infoDialogParams = InfoDialogParams(
+                                                        icon = icon,
+                                                        warning = warning,
+                                                        title = title,
+                                                        dialogText = dialogText,
+                                                        confirmButtonText = confirmButtonText
+                                                    ) { onClick() }
+                                                    openInformationDialog = true
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+//                                if (managedTeam.name != "") {
+//                                    Log.d("ProfileScreen", "Managed team name: ${managedTeam.name}")
+//                                    currentTeam = managedTeam
+//                                } else if (joinedTeam.name != "") {
+//                                    Log.d("ProfileScreen", "Joined team name: ${joinedTeam.name}")
+//                                    currentTeam = joinedTeam
+//                                }
+
+//                                if (currentTeam.name == "") {
+//                                    Log.d("ProfileScreen", "Current team name: ${currentTeam.name}")
+//                                    NoTeamScreen()
+//                                } else {
+//                                    is ResourceState.Success -> {
+//                                    userIsPartOfTeam = true
+//                                        val managedTeamResponse =4ZJ8DF
+//                                            (managedTeam as ResourceState.Success).data
+
+//                                    currentTeamName = currentTeam.name
+//
+//                                    val safePendingMembers =
+//                                        currentTeam.pendingMembers ?: mutableListOf()
+//                                    TeamProfile(
+//                                        teamName = currentTeam.name,
+//                                        typeOfSport = currentTeam.typeOfSport,
+//                                        manager = currentTeam.manager,
+//                                        inviteCode = currentTeam.inviteCode,
+//                                        members = currentTeam.members,
+//                                        pendingMembers = safePendingMembers,
+//                                        userIsAdmin = true, // TODO: Change this to check user role
+//                                        teamViewModel = teamViewModel,
+//                                        onIconClick = {
+//                                                icon: ImageVector, warning: Boolean, title: String,
+//                                                dialogText: String, confirmButtonText: String, onClick: () -> Unit,
+//                                            ->
+//                                            infoDialogParams = InfoDialogParams(
+//                                                icon = icon,
+//                                                warning = warning,
+//                                                title = title,
+//                                                dialogText = dialogText,
+//                                                confirmButtonText = confirmButtonText
+//                                            ) { onClick() }
+//                                            openInformationDialog = true
+//                                        }
+//                                    )
+//                                }
+//                                    }
+
+//                                    is ResourceState.Error -> {
+                                Log.d("TEAM-PROFILE-SCREEN", "Error loading team")
+//                                        NoTeamScreen()
+//                                    }
+
+//                                    is ResourceState.Idle -> TODO()
+//                                }
+                            }
+                        }
+
+                        is ResourceState.Error -> {
+                            Log.d("PROFILE-SCREEN", "Error loading user")
+                        }
+
+                        is ResourceState.Idle -> {
+                            //DO NOTHING
+                        }
+                    }
                 }
             }
             item {
@@ -151,23 +289,11 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                                 title = "Signing out",
                                 dialogText = "You're about to sign out.",
                                 confirmButtonText = "Sign out"
-                            ) {
-                                // TODO: Make the API call to logout here
+                            )
+                            {
+                                authViewModel.logout()
+                                teamViewModel.clearTeamsOnLogout()
                                 navController.navigate(Screen.Login.route)
-                            }
-                            openInformationDialog = true
-                        }
-                        AppButton(
-                            text = "Delete my Account"
-                        ) {
-                            infoDialogParams = InfoDialogParams(
-                                icon = Icons.Default.PersonOff,
-                                warning = true,
-                                title = "Account Deletion",
-                                dialogText = "You're about to DELETE YOUR ACCOUNT!",
-                                confirmButtonText = "Delete Account"
-                            ) {
-                                // TODO: Make the API call to delete account here
                             }
                             openInformationDialog = true
                         }
@@ -181,15 +307,40 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                                     text = "Join new Team",
                                     modifier = Modifier.fillMaxWidth(0.49f)
                                 ) {
-                                    bottomSheetContent = { TeamJoiningBottomSheet() }
-                                    showBottomSheet = true
+                                    when (currentUser) {
+                                        is ResourceState.Success -> {
+                                            val userResponse =
+                                                (currentUser as ResourceState.Success).data
+                                            bottomSheetContent = {
+                                                TeamJoiningBottomSheet(
+                                                    userId = userResponse.id,
+                                                    teamViewModel = teamViewModel
+                                                )
+                                            }
+                                            showBottomSheet = true
+                                        }
+
+                                        is ResourceState.Error -> {
+                                            //DO NOTHING
+                                        }
+
+                                        is ResourceState.Idle -> {
+                                            //DO NOTHING
+                                        }
+
+                                        is ResourceState.Loading -> {
+                                            //DO NOTHING
+                                        }
+                                    }
                                 }
                                 AppButton(
                                     text = "Create new Team",
                                     modifier = Modifier.fillMaxWidth(0.96f)
                                 ) {
                                     bottomSheetContent = {
-                                        TeamCreationBottomSheet {
+                                        TeamCreationBottomSheet(
+                                            teamViewModel = teamViewModel
+                                        ) {
                                             showBottomSheet = false
                                             navController.navigate(Screen.Dashboard.route)
                                         }
@@ -197,35 +348,35 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
                                     showBottomSheet = true
                                 }
                             }
-                            if (userIsPartOfTeam) {
-                                if (manager) AppButton(
-                                    text = "Delete this Team"
-                                ) {
-                                    infoDialogParams = InfoDialogParams(
-                                        icon = Icons.Default.GroupOff,
-                                        warning = true,
-                                        title = "Team Deletion",
-                                        dialogText = "You're about to DELETE THIS TEAM!",
-                                        confirmButtonText = "Delete Team"
-                                    ) {
-                                        // TODO: Make the API call to delete the team here
-                                    }
-                                    openInformationDialog = true
-                                }
-                                else AppButton(
-                                    text = "Leave this Team"
-                                ) {
-                                    infoDialogParams = InfoDialogParams(
-                                        icon = Icons.Default.ExitToApp,
-                                        title = "Leaving this Team",
-                                        dialogText = "You're about to leave this team.",
-                                        confirmButtonText = "Leave Team"
-                                    ) {
-                                        // TODO: Make the API call to leave the team here
-                                    }
-                                    openInformationDialog = true
-                                }
-                            }
+//                            if (userIsPartOfTeam) {
+//                                if (manager) AppButton(
+//                                    text = "Delete this Team"
+//                                ) {
+//                                    infoDialogParams = InfoDialogParams(
+//                                        icon = Icons.Default.GroupOff,
+//                                        warning = true,
+//                                        title = "Team Deletion",
+//                                        dialogText = "You're about to DELETE THIS TEAM!",
+//                                        confirmButtonText = "Delete Team"
+//                                    ) {
+//                                        // TODO: Make the API call to delete the team here
+//                                    }
+//                                    openInformationDialog = true
+//                                }
+//                                else AppButton(
+//                                    text = "Leave this Team"
+//                                ) {
+//                                    infoDialogParams = InfoDialogParams(
+//                                        icon = Icons.Default.ExitToApp,
+//                                        title = "Leaving this Team",
+//                                        dialogText = "You're about to leave this team.",
+//                                        confirmButtonText = "Leave Team"
+//                                    ) {
+//                                        // TODO: Make the API call to leave the team here
+//                                    }
+//                                    openInformationDialog = true
+//                                }
+//                            }
                         }
                 }
             }
@@ -237,10 +388,10 @@ fun ProfileScreen(navController: NavHostController, manager: Boolean = true) {
 @Composable
 fun UserProfile(
     profilePicture: Painter = painterResource(id = R.drawable.logo_app), // TODO: Change this to pass only a mapped user object
-    userName: String = "laurinknunz",
+    username: String = "laurinknunz",
     firstName: String = "Laurin",
     lastName: String = "Knünz",
-    email: String = "laurin.knunz@gmail.com"
+    email: String = "laurin.knunz@gmail.com",
 ) {
     var currentFirstName by remember { mutableStateOf(firstName) }
     var currentLastName by remember { mutableStateOf(lastName) }
@@ -263,7 +414,7 @@ fun UserProfile(
 
         }
         Column {
-            profileDetailLine(name = "Username", value = userName)
+            profileDetailLine(name = "Username", value = username)
             profileDetailLine(name = "Password", value = "●●●●●●●●", password = true)
             currentFirstName = profileDetailLine(name = "First name", value = firstName)
             currentLastName = profileDetailLine(name = "Last name", value = lastName)
@@ -274,29 +425,20 @@ fun UserProfile(
 
 @Composable
 fun TeamProfile(
-    teamName: String = "Laurins Team", // TODO: Change this to pass only a mapped team object
-    typeOfSport: String = "Floorball",
-    manager: String = "Laurin Knünz",
-    managerContact: String = "laurin.knunz@gmail.com",
-    inviteCode: String = "L4UR1N",
+    teamName: String, // TODO: Change this to pass only a mapped team object
+    typeOfSport: String,
+    manager: TeamUser,
+    inviteCode: String,
     userIsAdmin: Boolean,
     onIconClick: (ImageVector, Boolean, String, String, String, () -> Unit) -> Unit,
-    members: MutableList<List<String>> = mutableListOf(
-        mutableListOf("Admin", "Laurin Knünz", "You"),
-        mutableListOf("Admin", "Sorin Lazar", ""),
-        mutableListOf("User", "Lilli Jahn", ""),
-        mutableListOf("User", "Mathias Leitgeb", ""),
-        mutableListOf("User", "Leon Freudenthaler", ""),
-        mutableListOf("User", "Arik Kofranek", ""),
-        mutableListOf("User", "Fabian Maier", ""),
-        mutableListOf("User", "Burak Kongo", "pending"),
-        mutableListOf("User", "Mathias Kerndl", "pending"),
-        mutableListOf("User", "Rene Goldschmid", "pending"),
-        mutableListOf("User", "Judy Kardouh", "pending"),
-    )// TODO: Replace with list of users
+    members: List<TeamUser>,
+    pendingMembers: List<TeamUser>?,
+    teamViewModel: TeamViewModel,
 ) {
     var currentTeamName by remember { mutableStateOf(teamName) }
     var membersList by remember { mutableStateOf(members) }
+    val safePendingMembers = pendingMembers ?: mutableListOf()
+
     Column {
         Box(
             contentAlignment = Alignment.Center,
@@ -317,8 +459,12 @@ fun TeamProfile(
                 value = typeOfSport,
                 editable = userIsAdmin
             )
-            profileDetailLine(name = "Manager", value = manager, editable = false)
-            profileDetailLine(name = "Contact", value = managerContact, editable = false)
+            profileDetailLine(
+                name = "Manager",
+                value = manager.firstname + " " + manager.lastname,
+                editable = false
+            )
+            profileDetailLine(name = "Contact", value = manager.email, editable = false)
             profileDetailLine(name = "inviteCode", value = inviteCode, editable = false)
         }
         SmallTitle(title = "Team Members")
@@ -327,22 +473,29 @@ fun TeamProfile(
                 .fillMaxSize()
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(3.dp))
         ) {
-            membersList = membersList
-                .sortedWith(compareBy(
-                    { it[2] != "You" },
-                    { it[2] != "" },
-                    { it[2] != "pending" },
-                    { it[0] != "Admin" },
-                    { it[1] }
-                ))
-                .toMutableList()
-
-            for (member in membersList) {
-                TeamMemberEntry(member, userIsAdmin, onIconClick) { changedMember ->
-                    membersList = membersList.mapNotNull {
-                        if (it == member) changedMember else it
-                    }.toMutableList()
-                }
+            TeamMemberEntry(
+                member = manager,
+                teamName = teamName,
+                userIsAdmin = true,
+                teamViewModel = teamViewModel,
+                onIconClick = onIconClick
+            )
+            for (member in membersList.filter { member -> member != manager }) {
+                TeamMemberEntry(
+                    member = member,
+                    teamName = teamName,
+                    teamViewModel = teamViewModel,
+                    onIconClick = onIconClick
+                )
+            }
+            for (pendingMember in safePendingMembers) {
+                TeamMemberEntry(
+                    member = pendingMember,
+                    teamName = teamName,
+                    userIsPending = true,
+                    teamViewModel = teamViewModel,
+                    onIconClick = onIconClick
+                )
             }
         }
     }

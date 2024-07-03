@@ -20,12 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
 
 @Composable
-fun TeamCreationBottomSheet(onSuccess: () -> Unit) {
+fun TeamCreationBottomSheet(teamViewModel: TeamViewModel, onSuccess: () -> Unit) {
     var message by remember { mutableStateOf("") }
-    var name = ""
-    var typeOfSports = ""
+    var name by remember { mutableStateOf("") }
+    var typeOfSports by remember { mutableStateOf("") }
 
     SmallTitle(title = "Create new Team")
     BottomSheetTextField("Team Name") { newName -> name = newName }
@@ -33,14 +34,16 @@ fun TeamCreationBottomSheet(onSuccess: () -> Unit) {
 
     BottomSheetMessage(message = message)
     AppButton(text = "Create new Team") {
-        // TODO: Make api call here to request team joining
-        if (false) onSuccess() // If API call succeeded
-        else if (true) message = "Error message." // If API call failed
+        teamViewModel.createTeam(name, typeOfSports)
+        message = "Nice! Check out your team now."
     }
 }
 
 @Composable
-fun TeamJoiningBottomSheet() {
+fun TeamJoiningBottomSheet(
+    userId: String = "",
+    teamViewModel: TeamViewModel,
+) {
     SmallTitle(title = "Join new Team")
     Column(verticalArrangement = Arrangement.Center) {
         var message by remember { mutableStateOf("") }
@@ -48,10 +51,13 @@ fun TeamJoiningBottomSheet() {
 
         BottomSheetTextField("Invite Code") { newInviteCode -> inviteCode = newInviteCode }
         BottomSheetMessage(message = message)
-        AppButton(text = "Join Team") {
-            // TODO: Make api call here to request team joining
-            message = "Superb! Wait for an admin of the team to accept your join request."
-        }
+        AppButton(
+            text = "Join Team",
+            onClick = {
+                teamViewModel.joinTeam(userId, inviteCode)
+                message = "Superb! Wait for an admin of the team to accept your join request."
+            }
+        )
     }
 }
 
@@ -62,7 +68,7 @@ fun TeamSwitchBottomSheet(
         "Sorins Super Team",
         "Renés Soccer Team"
     ),
-    onChoosing: (String) -> Unit
+    onChoosing: (String) -> Unit,
 ) {
     SmallTitle(title = "Switch Teams")
     teams.forEach { team ->

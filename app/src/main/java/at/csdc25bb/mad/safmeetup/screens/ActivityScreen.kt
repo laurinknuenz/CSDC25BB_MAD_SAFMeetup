@@ -2,6 +2,8 @@
 
 package at.csdc25bb.mad.safmeetup.screens
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +36,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import at.csdc25bb.mad.safmeetup.SFMApplication
 import at.csdc25bb.mad.safmeetup.composables.ActivityTopBar
 import at.csdc25bb.mad.safmeetup.composables.AppButton
 import at.csdc25bb.mad.safmeetup.composables.BottomSheetTextField
@@ -45,21 +50,48 @@ import at.csdc25bb.mad.safmeetup.composables.ParticipationButton
 import at.csdc25bb.mad.safmeetup.composables.SmallTitle
 import at.csdc25bb.mad.safmeetup.composables.activityTypeSelector
 import at.csdc25bb.mad.safmeetup.navigation.Screen
+import at.csdc25bb.mad.safmeetup.ui.viewmodel.ActivityViewModel
 import java.time.LocalDate
 
 @Composable
-fun ActivityScreen(navController: NavHostController, activityId: String) {
+fun ActivityScreen(
+    activityViewModel: ActivityViewModel = hiltViewModel(),
+    navController: NavHostController,
+    activityId: String,
+) {
+    val sharedPref = SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
+    var userId = sharedPref.getString("userId", "")
 
-    val activityTitle = "Weekly Test Game"
-    val activityType = "Game"
-    val activityOpponent = "FH Technikum Wien"
-    val activityDate = LocalDate.now()
-    val activityLocation = "FH Campus Gym"
-    val userParticipates = true
-    val activityParticipating = listOf("Laurin Knünz", "Sorin Lazar", "Lilli Jahn")
-    val activityNotParticipating =
+    var activityTitle by remember { mutableStateOf("") }
+    var activityType by remember { mutableStateOf("") }
+    var activityOpponent by remember { mutableStateOf("") }
+    var activityDate = LocalDate.now()
+    var activityLocation by remember { mutableStateOf("") }
+    var userParticipates  by remember { mutableStateOf(true) }
+    var activityParticipating = listOf("Laurin Knünz", "Sorin Lazar", "Lilli Jahn")
+    var activityNotParticipating =
         listOf("Mathias Kerndl", "Mathias Leitgeb", "Judy Kardouh", "Fabian Maier")
-    val activityNoReply = listOf("René Goldschmid", "Leon Freudenthaler", "Burak Kongo")
+    var activityNoReply = listOf("René Goldschmid", "Leon Freudenthaler", "Burak Kongo")
+
+
+    activityViewModel.getActivityById(activityId)
+    val currentActivity by activityViewModel.currentActivity.collectAsState()
+
+    Log.d("ActivityScreen", currentActivity.toString())
+
+    activityTitle = currentActivity.subject
+    activityType = currentActivity.type.name
+    activityOpponent = currentActivity.opponent.name
+    activityLocation = currentActivity.location
+
+    currentActivity.listOfGuests?.let { guests ->
+        for (guest in guests) {
+            if (guest._id._id == userId) {
+                userParticipates = guest.attendance == true
+                break
+            }
+        }
+    }
 
     var editMode by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf(activityTitle) }
@@ -93,7 +125,8 @@ fun ActivityScreen(navController: NavHostController, activityId: String) {
                 { editMode = true }
             ) {
                 // TODO: Make API call here to update the activity
-                if(true) editMode = false // Execute only on success of activity updating, so when all parameters are there and it worked
+                if (true) editMode =
+                    false // Execute only on success of activity updating, so when all parameters are there and it worked
             }
             LightGrayDivider(Modifier.padding(horizontal = 3.dp))
         }
@@ -136,10 +169,14 @@ fun ActivityScreen(navController: NavHostController, activityId: String) {
                     ) {
                         Row(modifier = Modifier.padding(5.dp)) {
                             ParticipationButton(true, participation) {
-                                participation = true
+                                if (userId != null) {
+                                    activityViewModel.updateAttendanceForUser(activityId, userId, true)
+                                }
                             } // TODO: Add api call here to change participation
                             ParticipationButton(false, participation) {
-                                participation = false
+                                if (userId != null) {
+                                    activityViewModel.updateAttendanceForUser(activityId, userId, false)
+                                }
                             } // Here too
                         }
                     }
@@ -183,7 +220,7 @@ fun ActivityTitleLine(
     value: String,
     mainTitle: Boolean,
     editMode: Boolean,
-    onChange: (String) -> Unit = {}
+    onChange: (String) -> Unit = {},
 ) {
 
     if (editMode && mainTitle) BottomSheetTextField(
@@ -206,7 +243,7 @@ fun activityDetailLine(
     value: String = "",
     date: LocalDate? = null,
     editMode: Boolean,
-    onDateChange: (LocalDate?) -> Unit = {}
+    onDateChange: (LocalDate?) -> Unit = {},
 ): String {
     var currentValue by remember { mutableStateOf(value) }
     var showExtendedDatePicker by remember { mutableStateOf(false) }
@@ -239,7 +276,7 @@ fun activityDetailLine(
 fun ActivityParticipationList(
     title: String,
     userList: List<String>,
-    icon: @Composable () -> Unit
+    icon: @Composable () -> Unit,
 ) {
     Row {
         icon()
