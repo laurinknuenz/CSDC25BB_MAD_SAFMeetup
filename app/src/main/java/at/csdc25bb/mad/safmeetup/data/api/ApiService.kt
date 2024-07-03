@@ -1,6 +1,7 @@
 package at.csdc25bb.mad.safmeetup.data.api
 
 import at.csdc25bb.mad.safmeetup.data.api.request.CreateActivityRequest
+import at.csdc25bb.mad.safmeetup.data.api.request.CreateTeamRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.LoginRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.RegisterRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.UserTeamAddRemoveRequest
@@ -27,6 +28,9 @@ interface ApiService {
     suspend fun getTeam(
         @Query("team") team: String
     ): Response<ApiResponse<Team>>
+
+    @POST("api/team")
+    suspend fun createTeam(@Body request: CreateTeamRequest): Response<ApiResponse<Team>>
 
     @GET("api/team/manager")
     suspend fun getTeamByManager(): Response<ApiResponse<Team>>

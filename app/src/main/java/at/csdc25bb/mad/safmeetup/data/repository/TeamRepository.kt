@@ -75,6 +75,23 @@ class TeamRepository @Inject constructor(
         }
     }
 
+    suspend fun createTeam(name: String, typeOfSport: String): Flow<Team> {
+        return flow {
+            Log.d(TAG, "[TEAM-REPO] Sending request to create a team")
+            val response = teamDataSource.createTeam(name, typeOfSport)
+            Log.d(TAG, response.body().toString())
+
+            if (response.isSuccessful && response.body() != null) {
+                val teamData = response.body()!!.data
+                Log.d(TAG, teamData.toString())
+                emit(teamData)
+            }
+        }.catch  { e ->
+            emit(Team())
+            Log.d(TAG, "Error while sending create team request")
+        }
+    }
+
     suspend fun joinTeam(userId: String, inviteCode: String): Flow<Team> {
        return flow {
             Log.d(TAG, "[TEAM-REPO] Sending request to join team")

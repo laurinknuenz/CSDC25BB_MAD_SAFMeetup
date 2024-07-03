@@ -56,6 +56,15 @@ class TeamViewModel @Inject constructor(
         }
     }
 
+    fun createTeam(name: String, typeOfSport: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            teamRepository.createTeam(name, typeOfSport).collectLatest { createdTeam ->
+                Log.d(TAG, createdTeam.toString())
+                _team.value = createdTeam
+            }
+        }
+    }
+
     fun joinTeam(userId: String, inviteCode: String) {
         viewModelScope.launch(Dispatchers.IO) {
             Log.d(TAG, "Sending request to join team: ${userId}, $inviteCode")

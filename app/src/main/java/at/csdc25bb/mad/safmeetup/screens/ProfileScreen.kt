@@ -127,10 +127,10 @@ fun ProfileScreen(
             DashboardProfileBottomBar(navController, false) {
                 bottomSheetContent =
                     {
-                        ActivityCreationBottomSheet (
+                        ActivityCreationBottomSheet(
                             activityViewModel = activityViewModel,
                             currentTeam = currentTeamName
-                        )  {
+                        ) {
                             navController.navigate(Screen.Dashboard.route)
                             showBottomSheet = false
                         }
@@ -175,52 +175,52 @@ fun ProfileScreen(
 //                                        Log.d("TEAM-PROFILE-SCREEN", "Loading team...")
 //                                        Loader()
 //                                    }
-                                    if (managedTeam.name != "") {
-                                        currentTeam = managedTeam
-                                    } else if (joinedTeam.name != ""){
-                                        currentTeam = joinedTeam
-                                    }
+                                if (managedTeam.name != "") {
+                                    currentTeam = managedTeam
+                                } else if (joinedTeam.name != "") {
+                                    currentTeam = joinedTeam
+                                }
 
-                                    if (currentTeam.name == ""){
-                                        NoTeamScreen()
-                                    } else {
+                                if (currentTeam.name == "") {
+                                    NoTeamScreen()
+                                } else {
 //                                    is ResourceState.Success -> {
-                                        userIsPartOfTeam = true
+                                    userIsPartOfTeam = true
 //                                        val managedTeamResponse =4ZJ8DF
 //                                            (managedTeam as ResourceState.Success).data
 
-                                        currentTeamName = currentTeam.name
+                                    currentTeamName = currentTeam.name
 
-                                        val safePendingMembers =
-                                            currentTeam.pendingMembers ?: mutableListOf()
-                                        TeamProfile(
-                                            teamName = currentTeam.name,
-                                            typeOfSport = currentTeam.typeOfSport,
-                                            manager = currentTeam.manager,
-                                            inviteCode = currentTeam.inviteCode,
-                                            members = currentTeam.members,
-                                            pendingMembers = safePendingMembers,
-                                            userIsAdmin = true, // TODO: Change this to check user role
-                                            teamViewModel = teamViewModel,
-                                            onIconClick = {
-                                                    icon: ImageVector, warning: Boolean, title: String,
-                                                    dialogText: String, confirmButtonText: String, onClick: () -> Unit,
-                                                ->
-                                                infoDialogParams = InfoDialogParams(
-                                                    icon = icon,
-                                                    warning = warning,
-                                                    title = title,
-                                                    dialogText = dialogText,
-                                                    confirmButtonText = confirmButtonText
-                                                ) { onClick() }
-                                                openInformationDialog = true
-                                            }
-                                        )
-                                    }
+                                    val safePendingMembers =
+                                        currentTeam.pendingMembers ?: mutableListOf()
+                                    TeamProfile(
+                                        teamName = currentTeam.name,
+                                        typeOfSport = currentTeam.typeOfSport,
+                                        manager = currentTeam.manager,
+                                        inviteCode = currentTeam.inviteCode,
+                                        members = currentTeam.members,
+                                        pendingMembers = safePendingMembers,
+                                        userIsAdmin = true, // TODO: Change this to check user role
+                                        teamViewModel = teamViewModel,
+                                        onIconClick = {
+                                                icon: ImageVector, warning: Boolean, title: String,
+                                                dialogText: String, confirmButtonText: String, onClick: () -> Unit,
+                                            ->
+                                            infoDialogParams = InfoDialogParams(
+                                                icon = icon,
+                                                warning = warning,
+                                                title = title,
+                                                dialogText = dialogText,
+                                                confirmButtonText = confirmButtonText
+                                            ) { onClick() }
+                                            openInformationDialog = true
+                                        }
+                                    )
+                                }
 //                                    }
 
 //                                    is ResourceState.Error -> {
-                                        Log.d("TEAM-PROFILE-SCREEN", "Error loading team")
+                                Log.d("TEAM-PROFILE-SCREEN", "Error loading team")
 //                                        NoTeamScreen()
 //                                    }
 
@@ -298,7 +298,9 @@ fun ProfileScreen(
                                     modifier = Modifier.fillMaxWidth(0.96f)
                                 ) {
                                     bottomSheetContent = {
-                                        TeamCreationBottomSheet {
+                                        TeamCreationBottomSheet(
+                                            teamViewModel = teamViewModel
+                                        ) {
                                             showBottomSheet = false
                                             navController.navigate(Screen.Dashboard.route)
                                         }
