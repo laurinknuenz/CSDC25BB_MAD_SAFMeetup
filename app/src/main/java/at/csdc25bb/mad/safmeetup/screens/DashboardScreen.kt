@@ -69,25 +69,11 @@ fun DashboardScreen(
         bottomBar = {
             DashboardProfileBottomBar(navController, true) {
                 bottomSheetContent = {
-//                    when (managedTeam) {
-//                        is ResourceState.Loading -> {
-//                            Log.d("DASHBOARD-SCREEN", "Loading team...")
-                            teamViewModel.getTeamByManager()
-//                        }
 
-//                        is ResourceState.Success -> {
-//                            val managedTeamResponse =
-//                                (managedTeam as ResourceState.Success).data
+                    teamViewModel.getTeamByManager()
 
-                            currentTeamName = managedTeam.name
-//                        }
+                    currentTeamName = managedTeam.name
 
-//                        is ResourceState.Error -> {
-//                            Log.d("DASHBOARD-SCREEN", "Error loading team")
-//                        }
-
-//                        is ResourceState.Idle -> TODO()
-//                    }
                     ActivityCreationBottomSheet (
                         activityViewModel = activityViewModel,
                         currentTeam = currentTeamName
@@ -147,26 +133,6 @@ fun DashboardScreen(
                     }
                 showBottomSheet = true
             }
-//            teamViewModel.getTeam("laurins Team")
-//            val team by teamViewModel.team.collectAsState()
-//            when(team) {
-//                is ResourceState.Loading -> {
-//                    Log.d("DASHBOARD-SCREEN", "Still loading")
-//                }
-//
-//                is ResourceState.Success -> {
-//                    val response = (team as ResourceState.Success).data
-//                    Log.d("DASHBOARD-SCREEN", "TEAM: ${response}")
-//                    Text(text = response.name)
-//                }
-//                is ResourceState.Error -> {
-//                    Log.d("DASHBOARD-SCREEN", "Error loading team")
-//                }
-//
-//                is ResourceState.Idle -> {
-//                    //DO NOTHING
-//                }
-//            }
 
             LightGrayDivider(
                 Modifier
@@ -174,117 +140,64 @@ fun DashboardScreen(
                     .padding(bottom = 5.dp)
                     .padding(horizontal = 4.dp)
             )
+            val response = userActivitiesFetched
+            Log.d("DASHBOARD-SCREEN", "Activities: ${response}")
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = dashboardPadding)
+            ) {
+                val filteredActivities = response.filter { activity ->
+                    val matchesSearchText = keywords.isEmpty() ||
+                            activity.subject.lowercase().contains(keywords.lowercase()) ||
+                            activity.hostingTeam.name.lowercase().contains(keywords.lowercase())  ||
+                            activity.opponent.name.lowercase().contains(keywords.lowercase())
 
-//            when(userActivities) {
-//                is ResourceState.Loading -> {
-//                    Log.d("DASHBOARD-SCREEN", "Still loading")
-//                }
-//
-//                is ResourceState.Success -> {
-                    val response = userActivitiesFetched
-                    Log.d("DASHBOARD-SCREEN", "Activities: ${response}")
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = dashboardPadding)
-                    ) {
-                        val filteredActivities = response.filter { activity ->
-                            val matchesSearchText = keywords.isEmpty() ||
-                                    activity.subject.lowercase().contains(keywords.lowercase()) ||
-                                    activity.hostingTeam.name.lowercase().contains(keywords.lowercase())  ||
-                                    activity.opponent.name.lowercase().contains(keywords.lowercase())
+                    val matchesSubject =
+                        subject.isEmpty() || activity.subject.lowercase().contains(keywords.lowercase())
 
-                            val matchesSubject =
-                                subject.isEmpty() || activity.subject.lowercase().contains(keywords.lowercase())
-
-                            val matchesLocation =
-                                location.isEmpty() || activity.location.lowercase().contains(location.lowercase())
+                    val matchesLocation =
+                        location.isEmpty() || activity.location.lowercase().contains(location.lowercase())
 
 //                            val matchesPickedDate = pickedDate?.let {
 //                                val date = Date.from(it.atStartOfDay(ZoneId.systemDefault()).toInstant())
 //                                activity.date == date
 //                            } ?: true
 
-                            val matchesType =
-                                type.isEmpty() || activity.type.name.lowercase().contains(type.lowercase())
+                    val matchesType =
+                        type.isEmpty() || activity.type.name.lowercase().contains(type.lowercase())
 
-                            matchesSearchText
-                                    && matchesSubject
-                                    && matchesLocation
+                    matchesSearchText
+                            && matchesSubject
+                            && matchesLocation
 //                                    && matchesPickedDate
-                                    && matchesType
-                        }
-                        items(filteredActivities.size) {
-                            val activity =
-                                filteredActivities[it] // TODO: Make the API call here to get the actual activities
-                            var participates = false
-                                activity.listOfGuests?.let { guests ->
-                                    for (guest in guests) {
-                                        if (guest._id._id == userId) {
-                                            participates = guest.attendance == true
-                                            break
-                                        }
-                                    }
-                                }
-                            ActivityCard(
-                                id = activity._id,
-                                title = activity.subject,
-                                type = activity.type.name,
-                                team = activity.hostingTeam.name,
-//                                date = activity.date.toString(),
-                                location = activity.location,
-                                participates = participates
-                            ) {
-                                navController.navigate(Screen.Activity.withId(activity._id)) // TODO: Pass the actual ID here
+                            && matchesType
+                }
+                items(filteredActivities.size) {
+                    val activity =
+                        filteredActivities[it] // TODO: Make the API call here to get the actual activities
+                    var participates by remember { mutableStateOf(false) }
+                    activity.listOfGuests?.let { guests ->
+                        for (guest in guests) {
+                            if (guest._id._id == userId) {
+                                participates = guest.attendance == true
+                                break
                             }
                         }
                     }
-//                }
-//                is ResourceState.Error -> {
-//                    Log.d("DASHBOARD-SCREEN", "Error loading activity")
-//                }
-//
-//                is ResourceState.Idle -> {
-//                    //DO NOTHING
-//                }
-//            }
-            // BEGINNING of mocking data for testing
-//            val listOfActivities = mutableListOf<List<String>>()
-//            listOfActivities.add(
-//                listOf(
-//                    "Weekly Training",
-//                    "Training",
-//                    LocalDate.now().format(GermanDateTimeFormatter),
-//                    "FH Campus Gym"
-//                )
-//            )
-//            listOfActivities.add(
-//                listOf(
-//                    "Game against Eagles",
-//                    "Game",
-//                    LocalDate.now().plusDays(3).format(GermanDateTimeFormatter),
-//                    "FH Technikum Gym"
-//                )
-//            )
-//            listOfActivities.add(
-//                listOf(
-//                    "Hike",
-//                    "Other Activity",
-//                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
-//                    "Kahlenberg"
-//                )
-//            )
-//            listOfActivities.add(
-//                listOf(
-//                    "Going to a restaurant",
-//                    "Other Activity",
-//                    LocalDate.now().plusDays(5).format(GermanDateTimeFormatter),
-//                    "Das Zehn"
-//                )
-//            )
-            // END of mocking data for testing
-
-
+                    ActivityCard(
+                        id = activity._id,
+                        title = activity.subject,
+                        type = activity.type.name,
+                        team = activity.hostingTeam.name,
+//                                date = activity.date.toString(),
+                        location = activity.location,
+                        participates = participates
+                    ) {
+                        navController.navigate(Screen.Activity.withId(activity._id))
+                    }
+                }
+            }
         }
     }
 }

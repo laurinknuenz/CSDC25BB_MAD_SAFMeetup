@@ -59,9 +59,11 @@ interface ApiService {
     @POST("api/activity")
     suspend fun createActivity(@Body request: CreateActivityRequest): Response<ApiResponse<List<Activity>>>
 
-
     @GET("api/activity/user")
     suspend fun getAllActivitiesForUser(): Response<ApiResponse<List<Activity>>>
+
+    @GET("api/activity/{activityId}")
+    suspend fun getActivityById(@Path("activityId") activityId: String): Response<ApiResponse<Activity>>
 
     @GET("api/user/{username}")
     suspend fun getUser(@Path("username") username: String): Response<ApiResponse<User>>

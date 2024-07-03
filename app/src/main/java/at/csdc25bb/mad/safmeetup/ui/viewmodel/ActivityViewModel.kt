@@ -19,12 +19,25 @@ class ActivityViewModel @Inject constructor(
     private val activityRepository: ActivityRepository
 ): ViewModel() {
 
+    private val _currentActivity: MutableStateFlow<Activity> = MutableStateFlow(Activity())
+
     private val _userActivities: MutableStateFlow<ResourceState<List<Activity>>> =
         MutableStateFlow(ResourceState.Loading())
 
     val userActivities: StateFlow<ResourceState<List<Activity>>> = _userActivities
 
+    val currentActivity: StateFlow<Activity> = _currentActivity
+
     val activities: MutableList<Activity> = mutableListOf()
+
+    fun getActivityById(activityId: String) {
+        viewModelScope.launch ( Dispatchers.IO ) {
+            activityRepository.getActivityById(activityId).collectLatest { activityResponse ->
+                Log.d(TAG, activityResponse.toString())
+                _currentActivity.value = activityResponse
+            }
+        }
+    }
 
     fun getAllActivitiesForUser() {
         viewModelScope.launch ( Dispatchers.IO ) {

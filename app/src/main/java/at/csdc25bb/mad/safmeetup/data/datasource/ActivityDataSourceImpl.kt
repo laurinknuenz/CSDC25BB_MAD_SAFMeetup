@@ -11,6 +11,13 @@ import javax.inject.Inject
 class ActivityDataSourceImpl @Inject constructor(
     private val apiService: ApiService,
 ) : ActivityDataSource {
+    override suspend fun getActivityById(activityId: String): Response<ApiResponse<Activity>> {
+        val response =  apiService.getActivityById(activityId)
+        Log.d(TAG, response.toString())
+        return response
+    }
+
+
     override suspend fun getAllActivitiesForTeam(): Response<ApiResponse<List<Activity>>> {
         return apiService.getAllActivitiesForTeam()
     }

@@ -12,6 +12,22 @@ import javax.inject.Inject
 class ActivityRepository @Inject constructor(
     private val activityDataSource: ActivityDataSource
 ) {
+
+    suspend fun getActivityById(activityId: String): Flow<Activity> {
+        return flow {
+            val response = activityDataSource.getActivityById(activityId)
+
+            if (response.isSuccessful && response.body() != null) {
+                val activityData = response.body()!!.data
+                emit(activityData)
+            } else {
+                emit(Activity())
+            }
+        }.catch { e ->
+            emit(Activity())
+        }
+    }
+
     suspend fun getAllActivitiesForUser(): Flow<ResourceState<List<Activity>>> {
         return flow {
             emit(ResourceState.Loading())
