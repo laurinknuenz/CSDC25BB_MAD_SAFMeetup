@@ -34,6 +34,10 @@ class UserRepository @Inject constructor(
                     putString("username", response.body()!!.username)
                     apply()
                 }
+                with(sharedPref.edit()) {
+                    putString("userId", response.body()!!.id)
+                    apply()
+                }
             } else {
                 Log.d(TAG, response.body().toString())
                 emit(ResourceState.Error("Invalid username or password"))

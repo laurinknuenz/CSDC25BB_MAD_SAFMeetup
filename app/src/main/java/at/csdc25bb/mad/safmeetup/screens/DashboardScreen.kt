@@ -2,6 +2,7 @@
 
 package at.csdc25bb.mad.safmeetup.screens
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import at.csdc25bb.mad.safmeetup.SFMApplication
 import at.csdc25bb.mad.safmeetup.composables.ActivityCard
 import at.csdc25bb.mad.safmeetup.composables.ActivityCreationBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.AdvancedFilterBottomSheet
@@ -47,6 +49,8 @@ fun DashboardScreen(
     activityViewModel: ActivityViewModel = hiltViewModel(),
     teamViewModel: TeamViewModel = hiltViewModel()
 ) {
+    val sharedPref = SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
+    var userId = sharedPref.getString("userId", "")
     var userActivitiesFetched by remember { mutableStateOf(listOf<Activity>()) }
 
     val managedTeam by teamViewModel.managedTeam.collectAsState()
@@ -213,12 +217,23 @@ fun DashboardScreen(
                         items(filteredActivities.size) {
                             val activity =
                                 filteredActivities[it] // TODO: Make the API call here to get the actual activities
+                            var participates = false
+                                activity.listOfGuests?.let { guests ->
+                                    for (guest in guests) {
+                                        if (guest._id._id == userId) {
+                                            participates = guest.attendance == true
+                                            break
+                                        }
+                                    }
+                                }
                             ActivityCard(
+                                id = activity._id,
                                 title = activity.subject,
                                 type = activity.type.name,
                                 team = activity.hostingTeam.name,
 //                                date = activity.date.toString(),
-                                location = activity.location
+                                location = activity.location,
+                                participates = participates
                             ) {
                                 navController.navigate(Screen.Activity.withId(activity._id)) // TODO: Pass the actual ID here
                             }

@@ -45,11 +45,11 @@ import java.util.Locale
 @Composable
 fun ActivityCard(
     id: String = "", // Needed for participation change
-    title: String = "Your Activity",
-    type: String = "Training",
+    title: String = "",
+    type: String = "",
     team: String = "",
     date: String = "Friday, 28. June 2024", // TODO: Change this to date or make it somehow to convert format to german format
-    location: String = "FH Campus Wien Gym",
+    location: String = "",
     participates: Boolean = true,
     onClick: () -> Unit
 ) {
