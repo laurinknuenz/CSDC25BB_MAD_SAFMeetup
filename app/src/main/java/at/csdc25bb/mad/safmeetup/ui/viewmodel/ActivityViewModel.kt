@@ -16,8 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ActivityViewModel @Inject constructor(
-    private val activityRepository: ActivityRepository
-): ViewModel() {
+    private val activityRepository: ActivityRepository,
+) : ViewModel() {
 
     private val _currentActivity: MutableStateFlow<Activity> = MutableStateFlow(Activity())
 
@@ -31,7 +31,7 @@ class ActivityViewModel @Inject constructor(
     val activities: MutableList<Activity> = mutableListOf()
 
     fun getActivityById(activityId: String) {
-        viewModelScope.launch ( Dispatchers.IO ) {
+        viewModelScope.launch(Dispatchers.IO) {
             activityRepository.getActivityById(activityId).collectLatest { activityResponse ->
                 Log.d(TAG, activityResponse.toString())
                 _currentActivity.value = activityResponse
@@ -39,8 +39,23 @@ class ActivityViewModel @Inject constructor(
         }
     }
 
+    fun updateAttendanceForUser(
+        activityId: String,
+        guestUserId: String,
+        attendance: Boolean,
+    ) {
+        Log.d(TAG, "Update attendance for user $guestUserId called $attendance")
+        viewModelScope.launch(Dispatchers.IO) {
+            activityRepository.updateAttendanceForUser(activityId, guestUserId, attendance)
+                .collectLatest { activityResponse ->
+                    Log.d(TAG, activityResponse.toString())
+                    _currentActivity.value = activityResponse
+                }
+        }
+    }
+
     fun getAllActivitiesForUser() {
-        viewModelScope.launch ( Dispatchers.IO ) {
+        viewModelScope.launch(Dispatchers.IO) {
             activityRepository.getAllActivitiesForUser().collectLatest { activityResponse ->
                 Log.d(TAG, activityResponse.toString())
                 _userActivities.value = activityResponse
@@ -49,7 +64,7 @@ class ActivityViewModel @Inject constructor(
     }
 
     fun getAllActivitiesForUserFetched(): MutableList<Activity> {
-        viewModelScope.launch ( Dispatchers.IO ) {
+        viewModelScope.launch(Dispatchers.IO) {
             activityRepository.getAllActivitiesForUserFetched().collectLatest { activityResponse ->
                 activities.clear()
                 activities.addAll(activityResponse)

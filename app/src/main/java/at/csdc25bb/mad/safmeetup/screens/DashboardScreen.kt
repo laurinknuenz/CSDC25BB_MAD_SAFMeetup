@@ -37,7 +37,6 @@ import at.csdc25bb.mad.safmeetup.composables.HorizontalDatePicker
 import at.csdc25bb.mad.safmeetup.composables.LightGrayDivider
 import at.csdc25bb.mad.safmeetup.composables.SearchBar
 import at.csdc25bb.mad.safmeetup.data.entity.activity.Activity
-import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import at.csdc25bb.mad.safmeetup.navigation.Screen
 import at.csdc25bb.mad.safmeetup.ui.viewmodel.ActivityViewModel
 import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
@@ -47,9 +46,10 @@ import java.time.LocalDate
 fun DashboardScreen(
     navController: NavHostController,
     activityViewModel: ActivityViewModel = hiltViewModel(),
-    teamViewModel: TeamViewModel = hiltViewModel()
+    teamViewModel: TeamViewModel = hiltViewModel(),
 ) {
-    val sharedPref = SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
+    val sharedPref =
+        SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
     var userId = sharedPref.getString("userId", "")
     var userActivitiesFetched by remember { mutableStateOf(listOf<Activity>()) }
 
@@ -74,10 +74,10 @@ fun DashboardScreen(
 
                     currentTeamName = managedTeam.name
 
-                    ActivityCreationBottomSheet (
+                    ActivityCreationBottomSheet(
                         activityViewModel = activityViewModel,
-                        currentTeam = currentTeamName
-                    ){
+                        currentTeamName = currentTeamName
+                    ) {
                         showBottomSheet = false
                         navController.navigate(Screen.Dashboard.route)
                     }
@@ -150,14 +150,16 @@ fun DashboardScreen(
                 val filteredActivities = response.filter { activity ->
                     val matchesSearchText = keywords.isEmpty() ||
                             activity.subject.lowercase().contains(keywords.lowercase()) ||
-                            activity.hostingTeam.name.lowercase().contains(keywords.lowercase())  ||
+                            activity.hostingTeam.name.lowercase().contains(keywords.lowercase()) ||
                             activity.opponent.name.lowercase().contains(keywords.lowercase())
 
                     val matchesSubject =
-                        subject.isEmpty() || activity.subject.lowercase().contains(keywords.lowercase())
+                        subject.isEmpty() || activity.subject.lowercase()
+                            .contains(keywords.lowercase())
 
                     val matchesLocation =
-                        location.isEmpty() || activity.location.lowercase().contains(location.lowercase())
+                        location.isEmpty() || activity.location.lowercase()
+                            .contains(location.lowercase())
 
 //                            val matchesPickedDate = pickedDate?.let {
 //                                val date = Date.from(it.atStartOfDay(ZoneId.systemDefault()).toInstant())
@@ -186,12 +188,8 @@ fun DashboardScreen(
                         }
                     }
                     ActivityCard(
-                        id = activity._id,
-                        title = activity.subject,
-                        type = activity.type.name,
-                        team = activity.hostingTeam.name,
-//                                date = activity.date.toString(),
-                        location = activity.location,
+                        activityViewModel = activityViewModel,
+                        activity = activity,
                         participates = participates
                     ) {
                         navController.navigate(Screen.Activity.withId(activity._id))

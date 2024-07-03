@@ -10,12 +10,34 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class ActivityRepository @Inject constructor(
-    private val activityDataSource: ActivityDataSource
+    private val activityDataSource: ActivityDataSource,
 ) {
 
     suspend fun getActivityById(activityId: String): Flow<Activity> {
         return flow {
             val response = activityDataSource.getActivityById(activityId)
+
+            if (response.isSuccessful && response.body() != null) {
+                val activityData = response.body()!!.data
+                emit(activityData)
+            } else {
+                emit(Activity())
+            }
+        }.catch { e ->
+            emit(Activity())
+        }
+    }
+
+    suspend fun updateAttendanceForUser(
+        activityId: String,
+        guestUserId: String,
+        attendance: Boolean,
+    ): Flow<Activity> {
+        return flow {
+            val response =
+                activityDataSource.updateAttendanceForUser(activityId, guestUserId, attendance)
+            Log.d(TAG, "Updating in the activity repository")
+            Log.d(TAG, response.body().toString())
 
             if (response.isSuccessful && response.body() != null) {
                 val activityData = response.body()!!.data

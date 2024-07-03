@@ -14,25 +14,19 @@ class TeamRepository @Inject constructor(
     private val teamDataSource: TeamDataSource,
 ) {
 
-    suspend fun getTeam(team: String): Flow<ResourceState<Team>> {
+    suspend fun getTeamsForUser(userId: String): Flow<List<Team>> {
         return flow {
-            emit(ResourceState.Loading())
-
-            val response = teamDataSource.getTeam(team)
-            Log.d("GET-TEAM", response.body().toString())
+            val response = teamDataSource.getTeamsForUser(userId)
+            Log.d("GET-TEAMS-FOR-USER", response.body().toString())
 
             if (response.isSuccessful && response.body() != null) {
                 val teamData = response.body()!!.data
-                emit(ResourceState.Success(teamData))
+                emit(teamData)
             } else {
-                emit(ResourceState.Error("Error fetching Team data"))
+                emit(emptyList())
             }
         }.catch { e ->
-            emit(
-                ResourceState.Error(
-                    e.localizedMessage ?: "Error in flow while retrieving Team data"
-                )
-            )
+            emit(emptyList())
         }
     }
 

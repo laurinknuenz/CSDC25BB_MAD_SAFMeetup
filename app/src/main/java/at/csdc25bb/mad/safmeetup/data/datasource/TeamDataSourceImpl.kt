@@ -18,8 +18,9 @@ class TeamDataSourceImpl @Inject constructor(
         return apiService.getAllTeams()
     }
 
-    override suspend fun getTeam(team: String): Response<ApiResponse<Team>> {
-        val response = apiService.getTeam(team)
+    override suspend fun getTeamsForUser(userId: String): Response<ApiResponse<List<Team>>> {
+        val response = apiService.getTeamsForUser(userId)
+        Log.d(TAG, "Getting the teams for user")
         Log.d(TAG, response.body().toString())
         return response
     }

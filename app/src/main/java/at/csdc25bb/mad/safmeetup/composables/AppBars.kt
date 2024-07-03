@@ -158,14 +158,17 @@ fun ProfileBarItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(text = text, style = textStyle, modifier = Modifier.padding(end = 10.dp))
-                CustomIconButton(onClick = { if (selected) onTeamSwitch() else onClick() }) {
-                    Icon(
-                        imageVector = Icons.Default.SwapHorizontalCircle,
-                        contentDescription = "Switch teams",
-                        tint = if (selected) Color.White else Color(0xFFF8C382)
-                    )
-                }
+                Text(text = text,
+                    style = textStyle,
+//                    modifier = Modifier.padding(end = 10.dp)
+                )
+//                CustomIconButton(onClick = { if (selected) onTeamSwitch() else onClick() }) {
+//                    Icon(
+//                        imageVector = Icons.Default.SwapHorizontalCircle,
+//                        contentDescription = "Switch teams",
+//                        tint = if (selected) Color.White else Color(0xFFF8C382)
+//                    )
+//                }
             }
         }
     }

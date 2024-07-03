@@ -8,6 +8,12 @@ interface ActivityDataSource {
     suspend fun getActivityById(activityId: String): Response<ApiResponse<Activity>>
     suspend fun getAllActivitiesForTeam(): Response<ApiResponse<List<Activity>>>
     suspend fun getAllActivitiesForUser(): Response<ApiResponse<List<Activity>>>
+    suspend fun updateAttendanceForUser(
+        activityId: String,
+        guestUserId: String,
+        attendance: Boolean,
+    ): Response<ApiResponse<Activity>>
+
     suspend fun createActivity(
         subject: String,
         activityType: String,

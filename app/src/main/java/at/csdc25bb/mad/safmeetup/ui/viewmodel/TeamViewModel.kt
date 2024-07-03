@@ -23,26 +23,24 @@ class TeamViewModel @Inject constructor(
         MutableStateFlow(Team())
     private val _managedTeam: MutableStateFlow<Team> =
         MutableStateFlow(Team())
-    private val _allTeams: MutableStateFlow<ResourceState<List<Team>>> =
-        MutableStateFlow(ResourceState.Loading())
+    private val _allTeams: MutableStateFlow<List<Team>> =
+        MutableStateFlow(emptyList())
 
     val team: StateFlow<Team> = _team
     val managedTeam: StateFlow<Team> = _managedTeam
-    val allTeams: StateFlow<ResourceState<List<Team>>> = _allTeams
+    val allTeams: StateFlow<List<Team>> = _allTeams
 
-    fun getAllTeams() {
-        viewModelScope.launch(Dispatchers.IO) {
-            teamRepository.getAllTeams().collectLatest { allTeamsResponse ->
-                _allTeams.value = allTeamsResponse
-            }
-        }
+    fun clearTeamsOnLogout() {
+        _team.value = Team()
+        _managedTeam.value = Team()
     }
 
-    fun getTeam(team: String) {
+    fun getTeamsForUser(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            teamRepository.getTeam(team).collectLatest { teamResponse ->
-                Log.d(TAG, teamResponse.toString())
-//                _team.value = teamResponse
+            teamRepository.getTeamsForUser(userId).collectLatest { teamsResponse ->
+                Log.d(TAG, "getTeamsForUser")
+                Log.d(TAG, teamsResponse.toString())
+                _allTeams.value = teamsResponse
             }
         }
     }
@@ -50,6 +48,7 @@ class TeamViewModel @Inject constructor(
     fun getTeamByManager() {
         viewModelScope.launch(Dispatchers.IO) {
             teamRepository.getTeamByManager().collectLatest { managedTeamResponse ->
+                Log.d(TAG, "getTeamByManager")
                 Log.d(TAG, managedTeamResponse.toString())
                 _managedTeam.value = managedTeamResponse
             }

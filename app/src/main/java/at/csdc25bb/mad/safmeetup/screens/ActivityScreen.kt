@@ -169,10 +169,14 @@ fun ActivityScreen(
                     ) {
                         Row(modifier = Modifier.padding(5.dp)) {
                             ParticipationButton(true, participation) {
-                                participation = true
+                                if (userId != null) {
+                                    activityViewModel.updateAttendanceForUser(activityId, userId, true)
+                                }
                             } // TODO: Add api call here to change participation
                             ParticipationButton(false, participation) {
-                                participation = false
+                                if (userId != null) {
+                                    activityViewModel.updateAttendanceForUser(activityId, userId, false)
+                                }
                             } // Here too
                         }
                     }
