@@ -19,15 +19,15 @@ class TeamViewModel @Inject constructor(
     private val teamRepository: TeamRepository,
 ) : ViewModel() {
 
-    private val _team: MutableStateFlow<ResourceState<Team>> =
-        MutableStateFlow(ResourceState.Loading())
-    private val _managedTeam: MutableStateFlow<ResourceState<Team>> =
-        MutableStateFlow(ResourceState.Loading())
+    private val _team: MutableStateFlow<Team> =
+        MutableStateFlow(Team())
+    private val _managedTeam: MutableStateFlow<Team> =
+        MutableStateFlow(Team())
     private val _allTeams: MutableStateFlow<ResourceState<List<Team>>> =
         MutableStateFlow(ResourceState.Loading())
 
-    val team: StateFlow<ResourceState<Team>> = _team
-    val managedTeam: StateFlow<ResourceState<Team>> = _managedTeam
+    val team: StateFlow<Team> = _team
+    val managedTeam: StateFlow<Team> = _managedTeam
     val allTeams: StateFlow<ResourceState<List<Team>>> = _allTeams
 
     fun getAllTeams() {
@@ -42,7 +42,7 @@ class TeamViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             teamRepository.getTeam(team).collectLatest { teamResponse ->
                 Log.d(TAG, teamResponse.toString())
-                _team.value = teamResponse
+//                _team.value = teamResponse
             }
         }
     }
@@ -59,7 +59,9 @@ class TeamViewModel @Inject constructor(
     fun joinTeam(userId: String, inviteCode: String) {
         viewModelScope.launch(Dispatchers.IO) {
             Log.d(TAG, "Sending request to join team: ${userId}, $inviteCode")
-            teamRepository.joinTeam(userId, inviteCode)
+            teamRepository.joinTeam(userId, inviteCode).collectLatest { joinedTeam ->
+                _team.value = joinedTeam
+            }
         }
     }
 

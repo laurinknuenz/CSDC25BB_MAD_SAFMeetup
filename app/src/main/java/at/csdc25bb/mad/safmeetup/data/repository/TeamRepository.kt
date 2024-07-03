@@ -36,25 +36,21 @@ class TeamRepository @Inject constructor(
         }
     }
 
-    suspend fun getTeamByManager(): Flow<ResourceState<Team>> {
+    suspend fun getTeamByManager(): Flow<Team> {
         return flow {
-            emit(ResourceState.Loading())
+//            emit(ResourceState.Loading())
 
             val response = teamDataSource.getTeamByManager()
             Log.d("GET-TEAM-BY-MANAGER", response.body().toString())
 
             if (response.isSuccessful && response.body() != null) {
                 val teamData = response.body()!!.data
-                emit(ResourceState.Success(teamData))
+                emit(teamData)
             } else {
-                emit(ResourceState.Error("Error fetching Team data"))
+                emit(Team())
             }
         }.catch { e ->
-            emit(
-                ResourceState.Error(
-                    e.localizedMessage ?: "Error in flow while retrieving Team data"
-                )
-            )
+            emit(Team())
         }
     }
 
@@ -79,8 +75,8 @@ class TeamRepository @Inject constructor(
         }
     }
 
-    suspend fun joinTeam(userId: String, inviteCode: String): Unit {
-        try {
+    suspend fun joinTeam(userId: String, inviteCode: String): Flow<Team> {
+       return flow {
             Log.d(TAG, "[TEAM-REPO] Sending request to join team")
             val response = teamDataSource.joinTeam(userId, inviteCode)
             Log.d(TAG, response.body().toString())
@@ -88,10 +84,11 @@ class TeamRepository @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 val teamData = response.body()!!.data
                 Log.d(TAG, teamData.pendingMembers.toString())
+                emit (teamData)
             }
-        } catch (e: Exception) {
-            Log.d(TAG, "Error while sending join request")
-        }
+        }.catch { e ->
+           emit(Team()           )
+       }
     }
 
 

@@ -57,6 +57,7 @@ import at.csdc25bb.mad.safmeetup.composables.TeamMemberEntry
 import at.csdc25bb.mad.safmeetup.composables.TeamSwitchBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.Title
 import at.csdc25bb.mad.safmeetup.composables.profileDetailLine
+import at.csdc25bb.mad.safmeetup.data.entity.team.Team
 import at.csdc25bb.mad.safmeetup.data.entity.team.TeamUser
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import at.csdc25bb.mad.safmeetup.navigation.Screen
@@ -75,7 +76,10 @@ fun ProfileScreen(
     activityViewModel: ActivityViewModel = hiltViewModel(),
 ) {
     val currentUser by userViewModel.user.collectAsState()
+    val joinedTeam by teamViewModel.team.collectAsState()
     val managedTeam by teamViewModel.managedTeam.collectAsState()
+
+    var currentTeam by remember { mutableStateOf(Team()) }
 
     var currentTeamName by remember { mutableStateOf("") }
 
@@ -166,27 +170,35 @@ fun ProfileScreen(
                                     email = userResponse.email
                                 )
                             } else {
-                                when (managedTeam) {
-                                    is ResourceState.Loading -> {
-                                        Log.d("TEAM-PROFILE-SCREEN", "Loading team...")
-                                        Loader()
+//                                when (managedTeam) {
+//                                    is ResourceState.Loading -> {
+//                                        Log.d("TEAM-PROFILE-SCREEN", "Loading team...")
+//                                        Loader()
+//                                    }
+                                    if (managedTeam.name != "") {
+                                        currentTeam = managedTeam
+                                    } else if (joinedTeam.name != ""){
+                                        currentTeam = joinedTeam
                                     }
 
-                                    is ResourceState.Success -> {
+                                    if (currentTeam.name == ""){
+                                        NoTeamScreen()
+                                    } else {
+//                                    is ResourceState.Success -> {
                                         userIsPartOfTeam = true
-                                        val managedTeamResponse =
-                                            (managedTeam as ResourceState.Success).data
+//                                        val managedTeamResponse =4ZJ8DF
+//                                            (managedTeam as ResourceState.Success).data
 
-                                        currentTeamName = managedTeamResponse.name
+                                        currentTeamName = currentTeam.name
 
                                         val safePendingMembers =
-                                            managedTeamResponse.pendingMembers ?: mutableListOf()
+                                            currentTeam.pendingMembers ?: mutableListOf()
                                         TeamProfile(
-                                            teamName = managedTeamResponse.name,
-                                            typeOfSport = managedTeamResponse.typeOfSport,
-                                            manager = managedTeamResponse.manager,
-                                            inviteCode = managedTeamResponse.inviteCode,
-                                            members = managedTeamResponse.members,
+                                            teamName = currentTeam.name,
+                                            typeOfSport = currentTeam.typeOfSport,
+                                            manager = currentTeam.manager,
+                                            inviteCode = currentTeam.inviteCode,
+                                            members = currentTeam.members,
                                             pendingMembers = safePendingMembers,
                                             userIsAdmin = true, // TODO: Change this to check user role
                                             teamViewModel = teamViewModel,
@@ -205,14 +217,15 @@ fun ProfileScreen(
                                             }
                                         )
                                     }
+//                                    }
 
-                                    is ResourceState.Error -> {
+//                                    is ResourceState.Error -> {
                                         Log.d("TEAM-PROFILE-SCREEN", "Error loading team")
-                                        NoTeamScreen()
-                                    }
+//                                        NoTeamScreen()
+//                                    }
 
-                                    is ResourceState.Idle -> TODO()
-                                }
+//                                    is ResourceState.Idle -> TODO()
+//                                }
                             }
                         }
 

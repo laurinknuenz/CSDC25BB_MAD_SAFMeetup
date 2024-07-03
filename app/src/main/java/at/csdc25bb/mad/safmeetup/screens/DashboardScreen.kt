@@ -65,25 +65,25 @@ fun DashboardScreen(
         bottomBar = {
             DashboardProfileBottomBar(navController, true) {
                 bottomSheetContent = {
-                    when (managedTeam) {
-                        is ResourceState.Loading -> {
-                            Log.d("DASHBOARD-SCREEN", "Loading team...")
+//                    when (managedTeam) {
+//                        is ResourceState.Loading -> {
+//                            Log.d("DASHBOARD-SCREEN", "Loading team...")
                             teamViewModel.getTeamByManager()
-                        }
+//                        }
 
-                        is ResourceState.Success -> {
-                            val managedTeamResponse =
-                                (managedTeam as ResourceState.Success).data
+//                        is ResourceState.Success -> {
+//                            val managedTeamResponse =
+//                                (managedTeam as ResourceState.Success).data
 
-                            currentTeamName = managedTeamResponse.name
-                        }
+                            currentTeamName = managedTeam.name
+//                        }
 
-                        is ResourceState.Error -> {
-                            Log.d("DASHBOARD-SCREEN", "Error loading team")
-                        }
+//                        is ResourceState.Error -> {
+//                            Log.d("DASHBOARD-SCREEN", "Error loading team")
+//                        }
 
-                        is ResourceState.Idle -> TODO()
-                    }
+//                        is ResourceState.Idle -> TODO()
+//                    }
                     ActivityCreationBottomSheet (
                         activityViewModel = activityViewModel,
                         currentTeam = currentTeamName
