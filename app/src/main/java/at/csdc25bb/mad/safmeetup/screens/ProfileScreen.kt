@@ -178,7 +178,7 @@ fun ProfileScreen(
                                 )
                             } else {
 
-                                if (joinedTeams.isEmpty()){
+                                if (joinedTeams.isEmpty()) {
                                     NoTeamScreen()
                                 } else {
                                     Column {
@@ -393,8 +393,11 @@ fun UserProfile(
     lastName: String = "Knünz",
     email: String = "laurin.knunz@gmail.com",
 ) {
+    var currentUserName by remember { mutableStateOf(username) }
+    var currentPassword by remember { mutableStateOf("") }
     var currentFirstName by remember { mutableStateOf(firstName) }
     var currentLastName by remember { mutableStateOf(lastName) }
+    var currentEmail by remember { mutableStateOf(email) }
     Column {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -413,12 +416,28 @@ fun UserProfile(
             Title(text = "$currentFirstName $currentLastName")
 
         }
+        var buttonText by remember { mutableStateOf("Enable edit mode") }
+        var editMode by remember { mutableStateOf(false) }
+
         Column {
-            profileDetailLine(name = "Username", value = username)
-            profileDetailLine(name = "Password", value = "●●●●●●●●", password = true)
-            currentFirstName = profileDetailLine(name = "First name", value = firstName)
-            currentLastName = profileDetailLine(name = "Last name", value = lastName)
-            profileDetailLine(name = "E-Mail", value = email)
+            currentUserName = profileDetailLine(name = "Username", value = currentUserName, editMode = editMode)
+            currentPassword = profileDetailLine(
+                name = "Password",
+                value = "●●●●●●●●",
+                password = true,
+                editMode = editMode
+            )
+            currentFirstName =
+                profileDetailLine(name = "First name", value = currentFirstName, editMode = editMode)
+            currentLastName =
+                profileDetailLine(name = "Last name", value = currentLastName, editMode = editMode)
+            currentEmail = profileDetailLine(name = "E-Mail", value = currentEmail, editMode = editMode)
+
+            AppButton(text = buttonText, onClick = {
+                editMode = !editMode
+                buttonText = if (editMode) "Save changes" else "Enable edit mode"
+                // TODO: Make api call here to update user info
+            })
         }
     }
 }
@@ -436,6 +455,8 @@ fun TeamProfile(
     teamViewModel: TeamViewModel,
 ) {
     var currentTeamName by remember { mutableStateOf(teamName) }
+    var currentTypeOfSport by remember { mutableStateOf(typeOfSport) }
+
     var membersList by remember { mutableStateOf(members) }
     val safePendingMembers = pendingMembers ?: mutableListOf()
 
@@ -448,16 +469,21 @@ fun TeamProfile(
         ) {
             Title(currentTeamName, 0.dp)
         }
+        var buttonText by remember { mutableStateOf("Enable edit mode") }
+        var editMode by remember { mutableStateOf(false) }
+
         Column(modifier = Modifier.padding(bottom = 10.dp)) {
             currentTeamName = profileDetailLine(
                 name = "Team name",
                 value = currentTeamName,
-                editable = userIsAdmin
+                editable = userIsAdmin,
+                editMode = editMode
             )
-            profileDetailLine(
+            currentTypeOfSport = profileDetailLine(
                 name = "Type of Sport",
-                value = typeOfSport,
-                editable = userIsAdmin
+                value = currentTypeOfSport,
+                editable = userIsAdmin,
+                editMode = editMode
             )
             profileDetailLine(
                 name = "Manager",
@@ -466,6 +492,12 @@ fun TeamProfile(
             )
             profileDetailLine(name = "Contact", value = manager.email, editable = false)
             profileDetailLine(name = "inviteCode", value = inviteCode, editable = false)
+
+            AppButton(text = buttonText, onClick = {
+                editMode = !editMode
+                buttonText = if (editMode) "Save changes" else "Enable edit mode"
+                // TODO: Make api call here to update team info
+            })
         }
         SmallTitle(title = "Team Members")
         Column(
