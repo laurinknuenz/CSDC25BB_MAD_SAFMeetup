@@ -13,5 +13,10 @@ interface TeamDataSource {
     suspend fun addUserToTeam(userId: String, teamName: String): Response<ApiResponse<Team>>
     suspend fun removeUserFromTeam(userId: String, teamName: String): Response<ApiResponse<Team>>
     suspend fun createTeam(name: String, typeOfSport: String): Response<ApiResponse<Team>>
+    suspend fun updateTeam(
+        teamId: String,
+        name: String,
+        typeOfSport: String,
+    ): Response<ApiResponse<Team>>
 
 }

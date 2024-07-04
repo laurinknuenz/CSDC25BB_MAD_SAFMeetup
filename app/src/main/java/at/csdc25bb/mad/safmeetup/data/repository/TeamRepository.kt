@@ -80,14 +80,39 @@ class TeamRepository @Inject constructor(
                 Log.d(TAG, teamData.toString())
                 emit(teamData)
             }
-        }.catch  { e ->
+        }.catch { e ->
             emit(Team())
             Log.d(TAG, "Error while sending create team request")
         }
     }
 
+    suspend fun updateTeam(
+        teamId: String,
+        name: String,
+        typeOfSport: String,
+    ): Flow<Team> {
+        return flow {
+            Log.d(TAG, "[TEAM-REPO] Sending request to update a team")
+            val response = teamDataSource.updateTeam(
+                teamId,
+                name,
+                typeOfSport
+            )
+            Log.d(TAG, response.body().toString())
+
+            if (response.isSuccessful && response.body() != null) {
+                val teamData = response.body()!!.data
+                Log.d(TAG, teamData.toString())
+                emit(teamData)
+            }
+        }.catch { e ->
+            emit(Team())
+            Log.d(TAG, "Error while sending update team request")
+        }
+    }
+
     suspend fun joinTeam(userId: String, inviteCode: String): Flow<Team> {
-       return flow {
+        return flow {
             Log.d(TAG, "[TEAM-REPO] Sending request to join team")
             val response = teamDataSource.joinTeam(userId, inviteCode)
             Log.d(TAG, response.body().toString())
@@ -95,11 +120,11 @@ class TeamRepository @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 val teamData = response.body()!!.data
                 Log.d(TAG, teamData.pendingMembers.toString())
-                emit (teamData)
+                emit(teamData)
             }
         }.catch { e ->
-           emit(Team()           )
-       }
+            emit(Team())
+        }
     }
 
 

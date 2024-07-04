@@ -1,11 +1,12 @@
 package at.csdc25bb.mad.safmeetup.data.datasource
 
 import android.util.Log
-import at.csdc25bb.mad.safmeetup.data.api.response.ApiResponse
 import at.csdc25bb.mad.safmeetup.data.api.ApiService
 import at.csdc25bb.mad.safmeetup.data.api.request.CreateTeamRequest
+import at.csdc25bb.mad.safmeetup.data.api.request.UpdateTeamRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.UserTeamAddRemoveRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.UserTeamJoinRequest
+import at.csdc25bb.mad.safmeetup.data.api.response.ApiResponse
 import at.csdc25bb.mad.safmeetup.data.entity.team.Team
 import retrofit2.Response
 import javax.inject.Inject
@@ -79,6 +80,19 @@ class TeamDataSourceImpl @Inject constructor(
             CreateTeamRequest(
                 name, typeOfSport
             )
+        )
+        Log.d(TAG, response.body().toString())
+        return response
+    }
+
+    override suspend fun updateTeam(
+        teamId: String,
+        name: String,
+        typeOfSport: String
+    ): Response<ApiResponse<Team>> {
+        val response = apiService.updateTeam(
+            teamId, UpdateTeamRequest(name, typeOfSport)
+
         )
         Log.d(TAG, response.body().toString())
         return response

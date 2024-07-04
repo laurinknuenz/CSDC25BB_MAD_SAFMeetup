@@ -451,9 +451,9 @@ fun UserProfile(
                     Log.d("UPDATING-WITH", "Email: $currentEmail")
                     userViewModel.updateUser(
                         userId,
-                        currentUserName,
                         currentFirstName,
                         currentLastName,
+                        currentUserName,
                         currentPassword,
                         currentEmail
                     )
@@ -466,7 +466,7 @@ fun UserProfile(
 @Composable
 fun TeamProfile(
     teamId: String,
-    teamName: String, // TODO: Change this to pass only a mapped team object
+    teamName: String,
     typeOfSport: String,
     manager: TeamUser,
     inviteCode: String,
@@ -518,7 +518,14 @@ fun TeamProfile(
             AppButton(text = buttonText, onClick = {
                 editMode = !editMode
                 buttonText = if (editMode) "Save changes" else "Enable edit mode"
-
+                if (!editMode) {
+                    Log.d("UPDATING-WITH", "Name: $currentTeamName, type of sport: $currentTypeOfSport")
+                    teamViewModel.updateTeam(
+                        teamId,
+                        currentTeamName,
+                        currentTypeOfSport
+                    )
+                }
             })
         }
         SmallTitle(title = "Team Members")
