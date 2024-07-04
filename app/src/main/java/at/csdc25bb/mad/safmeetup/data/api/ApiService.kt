@@ -5,10 +5,12 @@ import at.csdc25bb.mad.safmeetup.data.api.request.CreateTeamRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.LoginRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.RegisterRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.UpdateActivityRequest
+import at.csdc25bb.mad.safmeetup.data.api.request.UpdateTeamRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.UserTeamAddRemoveRequest
 import at.csdc25bb.mad.safmeetup.data.api.request.UserTeamJoinRequest
 import at.csdc25bb.mad.safmeetup.data.api.response.ApiResponse
 import at.csdc25bb.mad.safmeetup.data.api.response.LogoutResponse
+import at.csdc25bb.mad.safmeetup.data.api.request.UserUpdateRequest
 import at.csdc25bb.mad.safmeetup.data.entity.User
 import at.csdc25bb.mad.safmeetup.data.entity.activity.Activity
 import at.csdc25bb.mad.safmeetup.data.entity.team.Team
@@ -16,8 +18,8 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface ApiService {
 
@@ -41,6 +43,9 @@ interface ApiService {
 
     @POST("api/team/user/remove")
     suspend fun removeUserFromTeam(@Body request: UserTeamAddRemoveRequest): Response<ApiResponse<Team>>
+
+    @PUT("api/team/{teamId}")
+    suspend fun updateTeam(@Path("teamId") teamId: String, @Body request: UpdateTeamRequest): Response<ApiResponse<Team>>
 
     @POST("api/auth/login")
     suspend fun login(@Body request: LoginRequest): Response<User>
@@ -66,6 +71,9 @@ interface ApiService {
     @GET("api/activity/{activityId}")
     suspend fun getActivityById(@Path("activityId") activityId: String): Response<ApiResponse<Activity>>
 
-    @GET("api/user/{username}")
-    suspend fun getUser(@Path("username") username: String): Response<ApiResponse<User>>
+    @GET("api/user/{userId}")
+    suspend fun getUser(@Path("userId") userId: String): Response<ApiResponse<User>>
+
+    @PUT("api/user/{userId}")
+    suspend fun updateUser(@Path("userId") userId: String, @Body request: UserUpdateRequest): Response<ApiResponse<User>>
 }

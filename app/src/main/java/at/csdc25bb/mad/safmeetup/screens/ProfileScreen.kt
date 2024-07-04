@@ -77,7 +77,7 @@ fun ProfileScreen(
 ) {
     val sharedPref =
         SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
-    var userId = sharedPref.getString("userId", "")
+    val userId = sharedPref.getString("userId", "")
 
     val currentUser by userViewModel.user.collectAsState()
     val joinedTeams by teamViewModel.allTeams.collectAsState()
@@ -161,7 +161,7 @@ fun ProfileScreen(
                         is ResourceState.Loading -> {
                             Log.d("PROFILE-SCREEN", "Still loading")
                             Loader()
-                            teamViewModel.getTeamByManager()
+//                            teamViewModel.getTeamByManager()
                             if (userId != null) {
                                 teamViewModel.getTeamsForUser(userId)
                             }
@@ -171,10 +171,12 @@ fun ProfileScreen(
                             val userResponse = (currentUser as ResourceState.Success).data
                             if (userProfileSelected) {
                                 UserProfile(
+                                    userId = userId!!,
                                     username = userResponse.username,
                                     firstName = userResponse.firstname,
                                     lastName = userResponse.lastname,
-                                    email = userResponse.email
+                                    email = userResponse.email,
+                                    userViewModel = userViewModel,
                                 )
                             } else {
 
@@ -186,6 +188,7 @@ fun ProfileScreen(
                                             val safePendingMembers =
                                                 team.pendingMembers ?: mutableListOf()
                                             TeamProfile(
+                                                teamId = team.id,
                                                 teamName = team.name,
                                                 typeOfSport = team.typeOfSport,
                                                 manager = team.manager,
@@ -387,11 +390,13 @@ fun ProfileScreen(
 
 @Composable
 fun UserProfile(
+    userId: String,
     profilePicture: Painter = painterResource(id = R.drawable.logo_app), // TODO: Change this to pass only a mapped user object
     username: String = "laurinknunz",
     firstName: String = "Laurin",
     lastName: String = "Knünz",
     email: String = "laurin.knunz@gmail.com",
+    userViewModel: UserViewModel,
 ) {
     var currentUserName by remember { mutableStateOf(username) }
     var currentPassword by remember { mutableStateOf("") }
@@ -420,7 +425,8 @@ fun UserProfile(
         var editMode by remember { mutableStateOf(false) }
 
         Column {
-            currentUserName = profileDetailLine(name = "Username", value = currentUserName, editMode = editMode)
+            currentUserName =
+                profileDetailLine(name = "Username", value = currentUserName, editMode = editMode)
             currentPassword = profileDetailLine(
                 name = "Password",
                 value = "●●●●●●●●",
@@ -428,15 +434,30 @@ fun UserProfile(
                 editMode = editMode
             )
             currentFirstName =
-                profileDetailLine(name = "First name", value = currentFirstName, editMode = editMode)
+                profileDetailLine(
+                    name = "First name",
+                    value = currentFirstName,
+                    editMode = editMode
+                )
             currentLastName =
                 profileDetailLine(name = "Last name", value = currentLastName, editMode = editMode)
-            currentEmail = profileDetailLine(name = "E-Mail", value = currentEmail, editMode = editMode)
+            currentEmail =
+                profileDetailLine(name = "E-Mail", value = currentEmail, editMode = editMode)
 
             AppButton(text = buttonText, onClick = {
                 editMode = !editMode
                 buttonText = if (editMode) "Save changes" else "Enable edit mode"
-                // TODO: Make api call here to update user info
+                if (!editMode) {
+                    Log.d("UPDATING-WITH", "Email: $currentEmail")
+                    userViewModel.updateUser(
+                        userId,
+                        currentUserName,
+                        currentFirstName,
+                        currentLastName,
+                        currentPassword,
+                        currentEmail
+                    )
+                }
             })
         }
     }
@@ -444,6 +465,7 @@ fun UserProfile(
 
 @Composable
 fun TeamProfile(
+    teamId: String,
     teamName: String, // TODO: Change this to pass only a mapped team object
     typeOfSport: String,
     manager: TeamUser,
@@ -496,7 +518,7 @@ fun TeamProfile(
             AppButton(text = buttonText, onClick = {
                 editMode = !editMode
                 buttonText = if (editMode) "Save changes" else "Enable edit mode"
-                // TODO: Make api call here to update team info
+
             })
         }
         SmallTitle(title = "Team Members")

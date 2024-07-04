@@ -16,8 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val userRepository: UserRepository
-): ViewModel() {
+    private val userRepository: UserRepository,
+) : ViewModel() {
     private val _user: MutableStateFlow<ResourceState<User>> =
         MutableStateFlow(ResourceState.Loading())
 
@@ -31,8 +31,33 @@ class UserViewModel @Inject constructor(
         }
     }
 
+    fun updateUser(
+        userId: String,
+        firstname: String,
+        lastname: String,
+        username: String,
+        password: String,
+        email: String
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            Log.d(TAG, "Updating with email: $email")
+            userRepository.updateUser(
+                userId,
+                firstname,
+                lastname,
+                username,
+                password,
+                email
+            )
+                .collectLatest { userResponse ->
+                    Log.d(TAG, "Updated the user ${username}: ${userResponse}")
+                    getCurrentUser()
+                }
+        }
+    }
+
     init {
-        Log.d(ActivityViewModel.TAG, "In the init function of the ${ActivityViewModel.TAG}")
+        Log.d(TAG, "In the init function of the ${TAG}")
         getCurrentUser()
     }
 

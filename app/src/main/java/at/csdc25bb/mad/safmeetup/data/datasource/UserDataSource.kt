@@ -6,5 +6,15 @@ import retrofit2.Response
 
 interface UserDataSource {
 
-    suspend fun getUser(username: String):  Response<ApiResponse<User>>
+    suspend fun getUser(userId: String): Response<ApiResponse<User>>
+
+    suspend fun updateUser(
+        userId: String,
+        firstname: String,
+        lastname: String,
+        username: String,
+        password: String,
+        email: String,
+    ): Response<ApiResponse<User>>
+
 }

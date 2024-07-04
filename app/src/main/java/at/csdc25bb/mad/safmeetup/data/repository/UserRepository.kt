@@ -17,10 +17,11 @@ import javax.inject.Inject
 
 class UserRepository @Inject constructor(
     private val apiService: ApiService,
-    private val userDataSource: UserDataSource
+    private val userDataSource: UserDataSource,
 ) {
 
-    val sharedPref = SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
+    val sharedPref =
+        SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
 
     suspend fun login(username: String, password: String): Flow<ResourceState<User>> {
         return flow {
@@ -105,15 +106,14 @@ class UserRepository @Inject constructor(
     suspend fun getUser(): Flow<ResourceState<User>> {
         return flow {
             emit(ResourceState.Loading())
-            val username = sharedPref.getString("username", "")
-            val response = userDataSource.getUser(username!!)
+            val userId = sharedPref.getString("userId", "")
+            val response = userDataSource.getUser(userId!!)
             Log.d(TAG, response.body().toString())
 
             if (response.isSuccessful && response.body() != null) {
                 val userData = response.body()!!.data
                 emit(ResourceState.Success(userData))
-            }
-            else {
+            } else {
                 emit(ResourceState.Error("Invalid username or password"))
             }
         }.catch { e ->
@@ -121,7 +121,40 @@ class UserRepository @Inject constructor(
         }
     }
 
+
+    suspend fun updateUser(
+        userId: String,
+        firstname: String,
+        lastname: String,
+        username: String,
+        password: String,
+        email: String,
+    ): Flow<User> {
+        return flow {
+            Log.d(TAG, "Updating with email: $email")
+            val response =
+                userDataSource.updateUser(
+                    userId,
+                    firstname,
+                    lastname,
+                    username,
+                    password,
+                    email
+                )
+            Log.d(TAG, response.body().toString())
+
+            if (response.isSuccessful && response.body() != null) {
+                val userData = response.body()!!.data
+                emit(userData)
+            } else {
+                emit(User())
+            }
+        }.catch { e ->
+            emit(User())
+        }
+    }
+
     companion object {
-        const val TAG = "ActivityRepository"
+        const val TAG = "UserRepository"
     }
 }

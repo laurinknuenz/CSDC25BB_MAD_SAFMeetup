@@ -1,5 +1,6 @@
 package at.csdc25bb.mad.safmeetup.screens
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import at.csdc25bb.mad.safmeetup.SFMApplication
 import at.csdc25bb.mad.safmeetup.composables.AppButton
 import at.csdc25bb.mad.safmeetup.composables.BottomViewSwitcher
 import at.csdc25bb.mad.safmeetup.composables.ErrorMessageText
@@ -33,6 +35,9 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
     val loginState by authViewModel.loginState.collectAsState()
+
+    val sharedPref =
+        SFMApplication.instance.getSharedPreferences("SFMApplication", Context.MODE_PRIVATE)
 
     Column(verticalArrangement = Arrangement.Top) {
         RegisterLoginHeader()
@@ -76,6 +81,11 @@ fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
             Loader()
         }
         is ResourceState.Success -> {
+            val currentUser =  (loginState as ResourceState.Success).data
+            with(sharedPref.edit()) {
+                putString("userId", currentUser.id)
+                apply()
+            }
             navController.navigate(Screen.Dashboard.route) {
                 popUpTo(Screen.Login.route) { inclusive = true }
             }
