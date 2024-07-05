@@ -178,6 +178,7 @@ fun ProfileScreen(
                                         for (team in joinedTeams) {
                                             val safePendingMembers =
                                                 team.pendingMembers ?: mutableListOf()
+                                            val userIsAdmin = userId == team.manager._id
                                             TeamProfile(
                                                 teamId = team.id,
                                                 teamName = team.name,
@@ -186,7 +187,7 @@ fun ProfileScreen(
                                                 inviteCode = team.inviteCode,
                                                 members = team.members,
                                                 pendingMembers = safePendingMembers,
-                                                userIsAdmin = true, // TODO: Change this to check user role
+                                                userIsAdmin = userIsAdmin, // TODO: Change this to check user role
                                                 teamViewModel = teamViewModel,
                                                 onIconClick = {
                                                         icon: ImageVector, warning: Boolean, title: String,
@@ -445,7 +446,8 @@ fun TeamProfile(
             TeamMemberEntry(
                 member = manager,
                 teamName = teamName,
-                userIsAdmin = true,
+                userIsManager = true,
+                userIsAdmin = userIsAdmin,
                 teamViewModel = teamViewModel,
                 onIconClick = onIconClick
             )
@@ -453,6 +455,8 @@ fun TeamProfile(
                 TeamMemberEntry(
                     member = member,
                     teamName = teamName,
+                    userIsManager = false,
+                    userIsAdmin = userIsAdmin,
                     teamViewModel = teamViewModel,
                     onIconClick = onIconClick
                 )
@@ -461,6 +465,8 @@ fun TeamProfile(
                 TeamMemberEntry(
                     member = pendingMember,
                     teamName = teamName,
+                    userIsManager = false,
+                    userIsAdmin = userIsAdmin,
                     userIsPending = true,
                     teamViewModel = teamViewModel,
                     onIconClick = onIconClick

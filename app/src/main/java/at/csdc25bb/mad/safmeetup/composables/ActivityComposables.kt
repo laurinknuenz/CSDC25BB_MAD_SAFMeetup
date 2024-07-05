@@ -59,6 +59,7 @@ fun ActivityCard(
     val title by remember { mutableStateOf(activity.subject) }
     val type by remember { mutableStateOf(activity.type.name) }
     val team by remember { mutableStateOf(activity.hostingTeam.name) }
+    val opponent by remember { mutableStateOf(activity.opponent.name) }
     val location by remember { mutableStateOf(activity.location) }
     val date by remember { mutableStateOf("Friday, 5. July 2024") }
 
@@ -81,7 +82,10 @@ fun ActivityCard(
                     .fillMaxWidth()
                     .padding(vertical = 5.dp)
             )
-            ActivityDetailLine(detail = "Team", team)
+            ActivityDetailLine(detail = "Hosting Team", team)
+            if (team != opponent) {
+                ActivityDetailLine(detail = "Opponent", opponent)
+            }
             ActivityDetailLine(detail = "Date", date)
             ActivityDetailLine(detail = "Location", location)
 

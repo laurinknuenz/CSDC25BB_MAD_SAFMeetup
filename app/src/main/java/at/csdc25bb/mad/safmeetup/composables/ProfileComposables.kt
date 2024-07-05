@@ -110,6 +110,7 @@ fun ProfileTextField(
 fun TeamMemberEntry(
     member: TeamUser,
     teamName: String,
+    userIsManager: Boolean = false,
     userIsAdmin: Boolean = false,
     userIsPending: Boolean = false,
     teamViewModel: TeamViewModel,
@@ -126,14 +127,14 @@ fun TeamMemberEntry(
     ) {
         Row {
             Icon(
-                imageVector = if (userIsAdmin) Icons.Default.VerifiedUser else Icons.Default.Person,
+                imageVector = if (userIsManager) Icons.Default.VerifiedUser else Icons.Default.Person,
                 contentDescription = "Icon of user",
                 modifier = Modifier.padding(end = 10.dp)
             )
             Text(text = member.firstname)
         }
         Row {
-            if (!userIsAdmin) {
+            if (userIsAdmin) {
                 if (!userIsPending) {
                     val removeIcon = Icons.Default.DeleteOutline
                     val removeAction = "Remove user"
