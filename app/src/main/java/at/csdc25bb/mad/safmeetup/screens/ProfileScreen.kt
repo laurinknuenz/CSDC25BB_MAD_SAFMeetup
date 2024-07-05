@@ -307,6 +307,7 @@ fun UserProfile(
     email: String = "laurin.knunz@gmail.com",
     userViewModel: UserViewModel,
 ) {
+    val hiddenPassword = "●●●●●●●●"
     var currentUserName by remember { mutableStateOf(username) }
     var currentPassword by remember { mutableStateOf("") }
     var currentFirstName by remember { mutableStateOf(firstName) }
@@ -338,7 +339,7 @@ fun UserProfile(
                 profileDetailLine(name = "Username", value = currentUserName, editMode = editMode)
             currentPassword = profileDetailLine(
                 name = "Password",
-                value = "●●●●●●●●",
+                value = hiddenPassword,
                 password = true,
                 editMode = editMode
             )
@@ -358,6 +359,10 @@ fun UserProfile(
                 buttonText = if (editMode) "Save changes" else "Enable edit mode"
                 if (!editMode) {
                     Log.d("UPDATING-WITH", "Email: $currentEmail")
+                    val hasPasswordChanged = currentPassword != hiddenPassword
+                    if (!hasPasswordChanged) {
+                        currentPassword = ""
+                    }
                     userViewModel.updateUser(
                         userId,
                         currentFirstName,
