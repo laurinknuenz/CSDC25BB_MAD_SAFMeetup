@@ -14,7 +14,7 @@ class UserDataSourceImpl @Inject constructor(
 
     override suspend fun getUser(userId: String): Response<ApiResponse<User>> {
         val response = apiService.getUser(userId)
-        Log.d(TeamDataSourceImpl.TAG, response.body().toString())
+        Log.d(TAG, response.body().toString())
         return response
     }
 
@@ -30,7 +30,7 @@ class UserDataSourceImpl @Inject constructor(
             userId,
             UserUpdateRequest(firstname, lastname, username, password, email)
         )
-        Log.d(TeamDataSourceImpl.TAG, response.body().toString())
+        Log.d(TAG, response.body().toString())
         return response
     }
 

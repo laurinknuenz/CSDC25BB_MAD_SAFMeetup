@@ -24,8 +24,6 @@ class ActivityViewModel @Inject constructor(
     private val _userActivities: MutableStateFlow<ResourceState<List<Activity>>> =
         MutableStateFlow(ResourceState.Loading())
 
-    val userActivities: StateFlow<ResourceState<List<Activity>>> = _userActivities
-
     val currentActivity: StateFlow<Activity> = _currentActivity
 
     val activities: MutableList<Activity> = mutableListOf()

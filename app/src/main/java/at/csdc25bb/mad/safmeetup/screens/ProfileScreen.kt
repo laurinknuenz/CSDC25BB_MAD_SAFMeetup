@@ -57,7 +57,6 @@ import at.csdc25bb.mad.safmeetup.composables.TeamMemberEntry
 import at.csdc25bb.mad.safmeetup.composables.TeamSwitchBottomSheet
 import at.csdc25bb.mad.safmeetup.composables.Title
 import at.csdc25bb.mad.safmeetup.composables.profileDetailLine
-import at.csdc25bb.mad.safmeetup.data.entity.team.Team
 import at.csdc25bb.mad.safmeetup.data.entity.team.TeamUser
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import at.csdc25bb.mad.safmeetup.navigation.Screen
@@ -81,18 +80,11 @@ fun ProfileScreen(
 
     val currentUser by userViewModel.user.collectAsState()
     val joinedTeams by teamViewModel.allTeams.collectAsState()
-    val managedTeam by teamViewModel.managedTeam.collectAsState()
-
-    var currentTeam by remember { mutableStateOf(Team()) }
 
     var currentTeamName by remember { mutableStateOf("") }
 
-    var errorMessage by remember { mutableStateOf("") }
-    val logoutState by authViewModel.logoutState.collectAsState()
-
     var userProfileSelected by remember { mutableStateOf(true) }
     var chosenTeam by remember { mutableStateOf("Laurins Team") }
-//    var userIsPartOfTeam by remember { mutableStateOf(false) }
 
     var openInformationDialog by remember { mutableStateOf(false) }
     var infoDialogParams by remember {
@@ -161,7 +153,6 @@ fun ProfileScreen(
                         is ResourceState.Loading -> {
                             Log.d("PROFILE-SCREEN", "Still loading")
                             Loader()
-//                            teamViewModel.getTeamByManager()
                             if (userId != null) {
                                 teamViewModel.getTeamsForUser(userId)
                             }
@@ -214,60 +205,6 @@ fun ProfileScreen(
                                         }
                                     }
                                 }
-//                                if (managedTeam.name != "") {
-//                                    Log.d("ProfileScreen", "Managed team name: ${managedTeam.name}")
-//                                    currentTeam = managedTeam
-//                                } else if (joinedTeam.name != "") {
-//                                    Log.d("ProfileScreen", "Joined team name: ${joinedTeam.name}")
-//                                    currentTeam = joinedTeam
-//                                }
-
-//                                if (currentTeam.name == "") {
-//                                    Log.d("ProfileScreen", "Current team name: ${currentTeam.name}")
-//                                    NoTeamScreen()
-//                                } else {
-//                                    is ResourceState.Success -> {
-//                                    userIsPartOfTeam = true
-//                                        val managedTeamResponse =4ZJ8DF
-//                                            (managedTeam as ResourceState.Success).data
-
-//                                    currentTeamName = currentTeam.name
-//
-//                                    val safePendingMembers =
-//                                        currentTeam.pendingMembers ?: mutableListOf()
-//                                    TeamProfile(
-//                                        teamName = currentTeam.name,
-//                                        typeOfSport = currentTeam.typeOfSport,
-//                                        manager = currentTeam.manager,
-//                                        inviteCode = currentTeam.inviteCode,
-//                                        members = currentTeam.members,
-//                                        pendingMembers = safePendingMembers,
-//                                        userIsAdmin = true, // TODO: Change this to check user role
-//                                        teamViewModel = teamViewModel,
-//                                        onIconClick = {
-//                                                icon: ImageVector, warning: Boolean, title: String,
-//                                                dialogText: String, confirmButtonText: String, onClick: () -> Unit,
-//                                            ->
-//                                            infoDialogParams = InfoDialogParams(
-//                                                icon = icon,
-//                                                warning = warning,
-//                                                title = title,
-//                                                dialogText = dialogText,
-//                                                confirmButtonText = confirmButtonText
-//                                            ) { onClick() }
-//                                            openInformationDialog = true
-//                                        }
-//                                    )
-//                                }
-//                                    }
-
-//                                    is ResourceState.Error -> {
-                                Log.d("TEAM-PROFILE-SCREEN", "Error loading team")
-//                                        NoTeamScreen()
-//                                    }
-
-//                                    is ResourceState.Idle -> TODO()
-//                                }
                             }
                         }
 
@@ -351,35 +288,6 @@ fun ProfileScreen(
                                     showBottomSheet = true
                                 }
                             }
-//                            if (userIsPartOfTeam) {
-//                                if (manager) AppButton(
-//                                    text = "Delete this Team"
-//                                ) {
-//                                    infoDialogParams = InfoDialogParams(
-//                                        icon = Icons.Default.GroupOff,
-//                                        warning = true,
-//                                        title = "Team Deletion",
-//                                        dialogText = "You're about to DELETE THIS TEAM!",
-//                                        confirmButtonText = "Delete Team"
-//                                    ) {
-//                                        // TODO: Make the API call to delete the team here
-//                                    }
-//                                    openInformationDialog = true
-//                                }
-//                                else AppButton(
-//                                    text = "Leave this Team"
-//                                ) {
-//                                    infoDialogParams = InfoDialogParams(
-//                                        icon = Icons.Default.ExitToApp,
-//                                        title = "Leaving this Team",
-//                                        dialogText = "You're about to leave this team.",
-//                                        confirmButtonText = "Leave Team"
-//                                    ) {
-//                                        // TODO: Make the API call to leave the team here
-//                                    }
-//                                    openInformationDialog = true
-//                                }
-//                            }
                         }
                 }
             }

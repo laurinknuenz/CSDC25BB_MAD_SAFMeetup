@@ -97,16 +97,16 @@ class ActivityRepository @Inject constructor(
         return flow {
             emit(ResourceState.Loading())
             Log.d(
-                TeamRepository.TAG,
+                TAG,
                 "[ACTIVITY-REPO] Sending request to create activity $subject for the team $team"
             )
             val response =
                 activityDataSource.createActivity(subject, activityType, team, opponent, location)
-            Log.d(TeamRepository.TAG, response.body().toString())
+            Log.d(TAG, response.body().toString())
 
             if (response.isSuccessful && response.body() != null) {
                 val activityData = response.body()!!.data
-                Log.d(TeamRepository.TAG, activityData.toString())
+                Log.d(TAG, activityData.toString())
                 emit(ResourceState.Success(activityData))
             } else {
                 emit(ResourceState.Error("Error fetching Activities data for user"))

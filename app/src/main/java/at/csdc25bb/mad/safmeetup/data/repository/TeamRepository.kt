@@ -4,7 +4,6 @@ import android.util.Log
 import at.csdc25bb.mad.safmeetup.data.datasource.TeamDataSource
 import at.csdc25bb.mad.safmeetup.data.entity.team.Team
 import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
-import at.csdc25bb.mad.safmeetup.ui.viewmodel.TeamViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -32,7 +31,6 @@ class TeamRepository @Inject constructor(
 
     suspend fun getTeamByManager(): Flow<Team> {
         return flow {
-//            emit(ResourceState.Loading())
 
             val response = teamDataSource.getTeamByManager()
             Log.d("GET-TEAM-BY-MANAGER", response.body().toString())

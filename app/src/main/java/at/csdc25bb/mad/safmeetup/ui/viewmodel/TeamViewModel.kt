@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.csdc25bb.mad.safmeetup.data.entity.team.Team
 import at.csdc25bb.mad.safmeetup.data.repository.TeamRepository
-import at.csdc25bb.mad.safmeetup.data.utils.ResourceState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
